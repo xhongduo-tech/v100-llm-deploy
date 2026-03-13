@@ -1,0 +1,21 @@
+# GGUF 模型文件（体积大，不纳入版本控制）
+models/*
+!models/.gitkeep
+*.gguf
+
+# 离线资源（驱动、Docker 包等）
+Base/
+Images/
+
+# Docker 导出镜像
+*.tar
+
+# 系统与 IDE
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 日志
+*.log

@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # ========================================
+  # 服务 1：Gemma 3 (GPU 0)
+  # ========================================
+  gemma-server-gpu0:
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda
+    container_name: gemma-27b-node
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./models:/model
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['0']
+              capabilities: [gpu]
+    command: >
+      -m /model/gemma-3-27b-it-Q4_K_M.gguf
+      --alias gemma-3-27b-it-Q4_K_M
+      -c 4096
+      -ngl 99
+      --parallel 4
+      -cb
+      --host 0.0.0.0
+      --port 8080
+
+  # ========================================
+  # 服务 2：Qwen 3.5 (GPU 1)
+  # ========================================
+  qwen-server-gpu1:
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda
+    container_name: qwen-35b-node
+    restart: always
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./models:/model
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['1']
+              capabilities: [gpu]
+    command: >
+      -m /model/Qwen3.5-35B-A3B-Q4_K_M.gguf
+      --alias Qwen3.5-35B-A3B-Q4_K_M
+      --chat-template chatml
+      -c 4096
+      -ngl 99
+      --parallel 4
+      -cb
+      --host 0.0.0.0
+      --port 8080
+
+  # ========================================
+  # 服务 3：API 门户网站
+  # ========================================
+  api-docs-web:
+    image: nginx:alpine
+    container_name: testllm-api-docs
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./www:/usr/share/nginx/html:ro
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
