@@ -1,6 +1,8 @@
 # GGUF 模型文件（体积大，不纳入版本控制）
 models/*
 !models/.gitkeep
+Models/*
+!Models/.gitkeep
 *.gguf
 
 # 离线资源（驱动、Docker 包等）
