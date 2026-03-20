@@ -11,7 +11,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./models:/model
+      - ./Models:/model
     deploy:
       resources:
         reservations:
@@ -30,7 +30,7 @@ services:
       --port 8080
 
   # ========================================
-  # 服务 2：Qwen 3.5 (GPU 1)
+  # 服务 2：Qwen 3.5 35B VLM (GPU 1)
   # ========================================
   qwen-server-gpu1:
     image: ghcr.io/ggml-org/llama.cpp:server-cuda
@@ -39,7 +39,7 @@ services:
     ports:
       - "8081:8080"
     volumes:
-      - ./models:/model
+      - ./Models:/model
     deploy:
       resources:
         reservations:
@@ -49,6 +49,7 @@ services:
               capabilities: [gpu]
     command: >
       -m /model/Qwen3.5-35B-A3B-Q4_K_M.gguf
+      --mmproj /model/mmproj-F16_qwen35-35.gguf
       --alias Qwen3.5-35B-A3B-Q4_K_M
       --chat-template chatml
       -c 4096
@@ -59,7 +60,37 @@ services:
       --port 8080
 
   # ========================================
-  # 服务 3：API 门户网站
+  # 服务 3：Qwen 3.5 9B VLM (GPU 2)
+  # ========================================
+  qwen-server-gpu2:
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda
+    container_name: qwen-9b-node
+    restart: always
+    ports:
+      - "8082:8080"
+    volumes:
+      - ./Models:/model
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['2']
+              capabilities: [gpu]
+    command: >
+      -m /model/Qwen3.5-9B-Q4_K_M.gguf
+      --mmproj /model/mmproj-F16_qwen35-9.gguf
+      --alias Qwen3.5-9B-Q4_K_M
+      --chat-template chatml
+      -c 4096
+      -ngl 99
+      --parallel 4
+      -cb
+      --host 0.0.0.0
+      --port 8080
+
+  # ========================================
+  # 服务 4：API 门户网站
   # ========================================
   api-docs-web:
     image: nginx:alpine

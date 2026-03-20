@@ -167,10 +167,12 @@
             <div class="mini-card">
                 <h4>Qwen3.5-35B <span class="tps-tag">35-40 t/s</span></h4>
                 <code class="addr">api0.brdc-ai.cs.icbc:8081</code>
+                <div style="font-size:0.65rem;color:#a78bfa;margin-top:4px;">&#128247; 多模态 VLM 已启用</div>
             </div>
             <div class="mini-card">
                 <h4>Qwen3.5-9B <span class="tps-tag">75-80 t/s</span></h4>
                 <code class="addr">api0.brdc-ai.cs.icbc:8082</code>
+                <div style="font-size:0.65rem;color:#a78bfa;margin-top:4px;">&#128247; 多模态 VLM 已启用</div>
             </div>
         </section>
     </div>
@@ -184,6 +186,7 @@
                     <li><strong>物理级硬件隔离：</strong> 通过 Docker 容器技术，将 Gemma 与 Qwen 模型分别映射至独立的 GPU 核心。确保单模型全负载运行时互不干扰，计算响应时间抖动率低于 3%。</li>
                     <li><strong>连续批处理 (Continuous Batching)：</strong> 舍弃了传统的静态批处理方案，采用流式请求插入技术。在不增加首字延迟的情况下，将系统整体吞吐量提升了 <strong>4.5 倍</strong>。</li>
                     <li><strong>GGUF 矩阵优化：</strong> 采用 Q4_K_M 高精度量化算法，在大幅缩减显存占用的同时，保留了超过 98% 的模型原始推理精度。</li>
+                    <li><strong>多模态视觉扩展 (VLM)：</strong> 为 Qwen3.5 系列加载 FP16 精度多模态投影器（mmproj），在零额外显存开销的前提下赋予模型图像理解能力，支持票据识别、图表分析等业务场景。</li>
                 </ul>
             </div>
         </div>
@@ -193,8 +196,8 @@
             <div class="tech-box">
                 <ul class="tech-list">
                     <li><strong>Gemma3-27B：</strong> Google 最新世代权重，擅长<strong>复杂逻辑推理、代码生成</strong>及长文本摘要。（注：由于含核心策略，需内部密码授权访问）。</li>
-                    <li><strong>Qwen3.5-35B：</strong> 通义千问大参数量版，深度优化了<strong>金融语境理解</strong>，适合专业公文写作与合规风险分析。</li>
-                    <li><strong>Qwen3.5-9B：</strong> 极致响应速度。在专用节点上跑出了 <strong>80 tokens/s</strong> 的惊人速度，是实时 OCR 校验与轻量级交互的最佳选择。</li>
+                    <li><strong>Qwen3.5-35B：</strong> 通义千问大参数量版，深度优化了<strong>金融语境理解</strong>，适合专业公文写作与合规风险分析。现已加载多模态视觉投影器（mmproj），支持<strong>图像 + 文本混合输入</strong>，可直接理解票据、图表、截图等视觉材料。</li>
+                    <li><strong>Qwen3.5-9B：</strong> 极致响应速度。在专用节点上跑出了 <strong>80 tokens/s</strong> 的惊人速度。同样搭载多模态投影器，是<strong>实时 OCR 校验、图片内容审核</strong>与轻量级视觉交互的最佳选择。</li>
                 </ul>
             </div>
         </div>
@@ -226,6 +229,17 @@
             <div class="toggle"></div>
         </div>
 
+        <div class="control-unit" id="vlm-mode-wrap" style="display:none;">
+            <span class="label">Qwen 示例类型</span>
+            <div class="btn-row" id="mm-sel">
+                <button class="btn active" data-mm="text">纯文本对话</button>
+                <button class="btn" data-mm="mm">多模态 (图像+文本)</button>
+            </div>
+            <div style="font-size:0.65rem;color:var(--text-dim);margin-top:0.5rem;line-height:1.5;">
+                多模态示例使用 OpenAI 兼容的 <code style="color:var(--brand-cyan);">image_url</code>（支持 <code>data:image/...;base64,</code> 或公网 URL）。请将 <code>&lt;BASE64&gt;</code> 或路径替换为实际图片。
+            </div>
+        </div>
+
         <div class="code-win">
             <div class="code-head">
                 <span id="fn" style="font-size:0.7rem; color:var(--text-dim)">api_demo.sh</span>
@@ -238,10 +252,21 @@
 
 <script>
     // 状态管理
-    const state = { m: 'Gemma3-27B', p: '8080', t: 'curl', s: false };
+    const state = { m: 'Gemma3-27B', p: '8080', t: 'curl', s: false, mmMode: 'text' };
     const api_host = 'api0.brdc-ai.cs.icbc';
     const api_key = 'sk-brdc-ai-cluster';
     let gemmaUnlocked = false; // Gemma3 解锁状态
+
+    /** 与 docker-compose --alias 一致，供 API 请求使用 */
+    function apiModelName() {
+        if (state.m === 'Qwen3.5-35B') return 'Qwen3.5-35B-A3B-Q4_K_M';
+        if (state.m === 'Qwen3.5-9B') return 'Qwen3.5-9B-Q4_K_M';
+        return state.m;
+    }
+
+    function isQwenVlm() {
+        return state.m === 'Qwen3.5-35B' || state.m === 'Qwen3.5-9B';
+    }
 
     function draw() {
         const preContainer = document.getElementById('code-container');
@@ -280,17 +305,136 @@
 
         // 正常渲染代码
         cpBtn.style.display = 'block';
+        const vlmWrap = document.getElementById('vlm-mode-wrap');
+        if (vlmWrap) {
+            vlmWrap.style.display = isQwenVlm() ? 'block' : 'none';
+            if (!isQwenVlm()) state.mmMode = 'text';
+        }
+
         const url = `http://${api_host}:${state.p}/v1`;
+        const model = apiModelName();
         const q = "请分析银行大模型应用的合规性建议。";
+        const mmPrompt = "请描述图片中的内容，并指出与银行业务相关的要素。";
+        const useMm = isQwenVlm() && state.mmMode === 'mm';
         let c = "";
 
-        if (state.t === 'curl') {
+        if (useMm) {
+            if (state.t === 'curl') {
+                fn.innerText = "test_multimodal.sh";
+                c = `<span class="k">curl</span> -N ${url}/chat/completions \\
+  -H <span class="s">"Content-Type: application/json"</span> \\
+  -H <span class="s">"Authorization: Bearer ${api_key}"</span> \\
+  -d <span class="s">'{
+    "model": "${model}",
+    "messages": [{
+      "role": "user",
+      "content": [
+        {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64,&lt;BASE64&gt;"}},
+        {"type": "text", "text": "${mmPrompt}"}
+      ]
+    }],
+    "stream": ${state.s}
+  }'</span>`;
+            } else if (state.t === 'py') {
+                fn.innerText = "client_multimodal.py";
+                c = state.s ?
+`<span class="k">import</span> base64, requests, json
+<span class="k">with</span> <span class="f">open</span>(<span class="s">"receipt.jpg"</span>, <span class="s">"rb"</span>) <span class="k">as</span> f:
+    b64 = base64.<span class="f">b64encode</span>(f.read()).<span class="f">decode</span>()
+payload = {
+    <span class="s">"model"</span>: <span class="s">"${model}"</span>,
+    <span class="s">"messages"</span>: [{
+        <span class="s">"role"</span>: <span class="s">"user"</span>,
+        <span class="s">"content"</span>: [
+            {<span class="s">"type"</span>: <span class="s">"image_url"</span>, <span class="s">"image_url"</span>: {<span class="s">"url"</span>: <span class="s">f"data:image/jpeg;base64,{b64}"</span>}},
+            {<span class="s">"type"</span>: <span class="s">"text"</span>, <span class="s">"text"</span>: <span class="s">"${mmPrompt}"</span>}
+        ]
+    }],
+    <span class="s">"stream"</span>: <span class="k">True</span>
+}
+resp = requests.<span class="f">post</span>(<span class="s">"${url}/chat/completions"</span>, json=payload, stream=<span class="k">True</span>)
+<span class="k">for</span> line <span class="k">in</span> resp.<span class="f">iter_lines</span>():
+    <span class="k">if</span> line:
+        data = line.<span class="f">decode</span>(<span class="s">'utf-8'</span>)[<span class="n">6</span>:]
+        <span class="k">if</span> data <span class="k">and</span> data != <span class="s">"[DONE]"</span>:
+            <span class="f">print</span>(json.<span class="f">loads</span>(data)[<span class="s">'choices'</span>][<span class="n">0</span>][<span class="s">'delta'</span>].<span class="f">get</span>(<span class="s">'content'</span>, <span class="s">''</span>), end=<span class="s">''</span>, flush=<span class="k">True</span>)` :
+`<span class="k">import</span> base64, requests
+<span class="k">with</span> <span class="f">open</span>(<span class="s">"receipt.jpg"</span>, <span class="s">"rb"</span>) <span class="k">as</span> f:
+    b64 = base64.<span class="f">b64encode</span>(f.read()).<span class="f">decode</span>()
+resp = requests.<span class="f">post</span>(<span class="s">"${url}/chat/completions"</span>, json={
+    <span class="s">"model"</span>: <span class="s">"${model}"</span>,
+    <span class="s">"messages"</span>: [{
+        <span class="s">"role"</span>: <span class="s">"user"</span>,
+        <span class="s">"content"</span>: [
+            {<span class="s">"type"</span>: <span class="s">"image_url"</span>, <span class="s">"image_url"</span>: {<span class="s">"url"</span>: <span class="s">f"data:image/jpeg;base64,{b64}"</span>}},
+            {<span class="s">"type"</span>: <span class="s">"text"</span>, <span class="s">"text"</span>: <span class="s">"${mmPrompt}"</span>}
+        ]
+    }]
+})
+<span class="f">print</span>(resp.<span class="f">json</span>()[<span class="s">'choices'</span>][<span class="n">0</span>][<span class="s">'message'</span>][<span class="s">'content'</span>])`;
+            } else if (state.t === 'sdk') {
+                fn.innerText = "openai_multimodal.py";
+                c = `<span class="k">from</span> openai <span class="k">import</span> OpenAI
+<span class="k">import</span> base64
+<span class="k">with</span> <span class="f">open</span>(<span class="s">"receipt.jpg"</span>, <span class="s">"rb"</span>) <span class="k">as</span> f:
+    b64 = base64.<span class="f">b64encode</span>(f.read()).<span class="f">decode</span>()
+client = <span class="f">OpenAI</span>(base_url=<span class="s">"${url}"</span>, api_key=<span class="s">"${api_key}"</span>)
+user_msg = {
+    <span class="s">"role"</span>: <span class="s">"user"</span>,
+    <span class="s">"content"</span>: [
+        {<span class="s">"type"</span>: <span class="s">"image_url"</span>, <span class="s">"image_url"</span>: {<span class="s">"url"</span>: <span class="s">f"data:image/jpeg;base64,{b64}"</span>}},
+        {<span class="s">"type"</span>: <span class="s">"text"</span>, <span class="s">"text"</span>: <span class="s">"${mmPrompt}"</span>}
+    ]
+}
+resp = client.chat.completions.<span class="f">create</span>(
+    model=<span class="s">"${model}"</span>,
+    messages=[user_msg],
+    stream=${state.s ? '<span class="k">True</span>' : '<span class="k">False</span>'}
+)
+${state.s ? '<span class="k">for</span> chunk <span class="k">in</span> resp: <span class="f">print</span>(chunk.choices[<span class="n">0</span>].delta.content <span class="k">or</span> <span class="s">""</span>, end=<span class="s">""</span>)' : '<span class="f">print</span>(resp.choices[<span class="n">0</span>].message.content)'}`;
+            } else if (state.t === 'node') {
+                fn.innerText = "multimodal.mjs";
+                c = `<span class="k">import</span> fs <span class="k">from</span> <span class="s">"fs"</span>;
+<span class="k">import</span> OpenAI <span class="k">from</span> <span class="s">"openai"</span>;
+<span class="k">const</span> b64 = fs.<span class="f">readFileSync</span>(<span class="s">"receipt.jpg"</span>).<span class="f">toString</span>(<span class="s">"base64"</span>);
+<span class="k">const</span> api = <span class="k">new</span> <span class="f">OpenAI</span>({ baseURL: <span class="s">"${url}"</span>, apiKey: <span class="s">"${api_key}"</span> });
+<span class="k">const</span> res = <span class="k">await</span> api.chat.completions.<span class="f">create</span>({
+    model: <span class="s">"${model}"</span>,
+    messages: [{
+        role: <span class="s">"user"</span>,
+        content: [
+            { type: <span class="s">"image_url"</span>, image_url: { url: <span class="s">\`data:image/jpeg;base64,\${b64}\`</span> } },
+            { type: <span class="s">"text"</span>, text: <span class="s">"${mmPrompt}"</span> }
+        ]
+    }],
+    stream: ${state.s}
+});
+${state.s ? '<span class="k">for await</span> (<span class="k">const</span> chunk <span class="k">of</span> res) { process.stdout.<span class="f">write</span>(chunk.choices[<span class="n">0</span>]?.delta?.content || <span class="s">""</span>); }' : 'console.<span class="f">log</span>(res.choices[<span class="n">0</span>].message.content);'}`;
+            } else if (state.t === 'lc') {
+                fn.innerText = "chain_multimodal.py";
+                c = `<span class="k">import</span> base64
+<span class="k">from</span> langchain_core.messages <span class="k">import</span> HumanMessage
+<span class="k">from</span> langchain_openai <span class="k">import</span> ChatOpenAI
+<span class="k">with</span> <span class="f">open</span>(<span class="s">"receipt.jpg"</span>, <span class="s">"rb"</span>) <span class="k">as</span> f:
+    b64 = base64.<span class="f">b64encode</span>(f.read()).<span class="f">decode</span>()
+llm = <span class="f">ChatOpenAI</span>(
+    openai_api_base=<span class="s">"${url}"</span>,
+    openai_api_key=<span class="s">"${api_key}"</span>,
+    model_name=<span class="s">"${model}"</span>
+)
+msg = <span class="f">HumanMessage</span>(content=[
+    {<span class="s">"type"</span>: <span class="s">"image_url"</span>, <span class="s">"image_url"</span>: {<span class="s">"url"</span>: <span class="s">f"data:image/jpeg;base64,{b64}"</span>}},
+    {<span class="s">"type"</span>: <span class="s">"text"</span>, <span class="s">"text"</span>: <span class="s">"${mmPrompt}"</span>}
+])
+<span class="f">print</span>(llm.<span class="f">invoke</span>([msg]).content)`;
+            }
+        } else if (state.t === 'curl') {
             fn.innerText = "test_api.sh";
             c = `<span class="k">curl</span> -N ${url}/chat/completions \\
   -H <span class="s">"Content-Type: application/json"</span> \\
   -H <span class="s">"Authorization: Bearer ${api_key}"</span> \\
   -d <span class="s">'{
-    "model": "${state.m}",
+    "model": "${model}",
     "messages": [{"role": "user", "content": "${q}"}],
     "stream": ${state.s}
   }'</span>`;
@@ -299,7 +443,7 @@
             c = state.s ? 
 `<span class="k">import</span> requests, json
 resp = requests.<span class="f">post</span>(<span class="s">"${url}/chat/completions"</span>, 
-    json={<span class="s">"model"</span>: <span class="s">"${state.m}"</span>, <span class="s">"messages"</span>: [{<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: <span class="s">"${q}"</span>}], <span class="s">"stream"</span>: <span class="k">True</span>},
+    json={<span class="s">"model"</span>: <span class="s">"${model}"</span>, <span class="s">"messages"</span>: [{<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: <span class="s">"${q}"</span>}], <span class="s">"stream"</span>: <span class="k">True</span>},
     stream=<span class="k">True</span>)
 <span class="k">for</span> line <span class="k">in</span> resp.<span class="f">iter_lines</span>():
     <span class="k">if</span> line:
@@ -308,7 +452,7 @@ resp = requests.<span class="f">post</span>(<span class="s">"${url}/chat/complet
             <span class="f">print</span>(json.<span class="f">loads</span>(data)[<span class="s">'choices'</span>][<span class="n">0</span>][<span class="s">'delta'</span>].<span class="f">get</span>(<span class="s">'content'</span>, <span class="s">''</span>), end=<span class="s">''</span>, flush=<span class="k">True</span>)` :
 `<span class="k">import</span> requests
 resp = requests.<span class="f">post</span>(<span class="s">"${url}/chat/completions"</span>, json={
-    <span class="s">"model"</span>: <span class="s">"${state.m}"</span>, <span class="s">"messages"</span>: [{<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: <span class="s">"${q}"</span>}]
+    <span class="s">"model"</span>: <span class="s">"${model}"</span>, <span class="s">"messages"</span>: [{<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: <span class="s">"${q}"</span>}]
 })
 <span class="f">print</span>(resp.<span class="f">json</span>()[<span class="s">'choices'</span>][<span class="n">0</span>][<span class="s">'message'</span>][<span class="s">'content'</span>])`;
         } else if (state.t === 'sdk') {
@@ -316,7 +460,7 @@ resp = requests.<span class="f">post</span>(<span class="s">"${url}/chat/complet
             c = `<span class="k">from</span> openai <span class="k">import</span> OpenAI
 client = <span class="f">OpenAI</span>(base_url=<span class="s">"${url}"</span>, api_key=<span class="s">"${api_key}"</span>)
 resp = client.chat.completions.<span class="f">create</span>(
-    model=<span class="s">"${state.m}"</span>,
+    model=<span class="s">"${model}"</span>,
     messages=[{<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: <span class="s">"${q}"</span>}],
     stream=${state.s ? '<span class="k">True</span>' : '<span class="k">False</span>'}
 )
@@ -326,7 +470,7 @@ ${state.s ? '<span class="k">for</span> chunk <span class="k">in</span> resp: <s
             c = `<span class="k">import</span> OpenAI <span class="k">from</span> <span class="s">"openai"</span>;
 <span class="k">const</span> api = <span class="k">new</span> <span class="f">OpenAI</span>({ baseURL: <span class="s">"${url}"</span>, apiKey: <span class="s">"${api_key}"</span> });
 <span class="k">const</span> res = <span class="k">await</span> api.chat.completions.<span class="f">create</span>({
-    model: <span class="s">"${state.m}"</span>,
+    model: <span class="s">"${model}"</span>,
     messages: [{ role: <span class="s">"user"</span>, content: <span class="s">"${q}"</span> }],
     stream: ${state.s}
 });
@@ -334,10 +478,14 @@ ${state.s ? '<span class="k">for await</span> (<span class="k">const</span> chun
         } else if (state.t === 'lc') {
             fn.innerText = "chain.py";
             c = `<span class="k">from</span> langchain_openai <span class="k">import</span> ChatOpenAI
-llm = <span class="f">ChatOpenAI</span>(openai_api_base=<span class="s">"${url}"</span>, openai_api_key=<span class="s">"${api_key}"</span>, model_name=<span class="s">"${state.m}"</span>)
+llm = <span class="f">ChatOpenAI</span>(openai_api_base=<span class="s">"${url}"</span>, openai_api_key=<span class="s">"${api_key}"</span>, model_name=<span class="s">"${model}"</span>)
 ${state.s ? '<span class="k">for</span> chunk <span class="k">in</span> llm.<span class="f">stream</span>(<span class="s">"' + q + '"</span>): <span class="f">print</span>(chunk.content, end=<span class="s">""</span>, flush=<span class="k">True</span>)' : '<span class="f">print</span>(llm.<span class="f">invoke</span>(<span class="s">"' + q + '"</span>).content)'}`;
         }
         preContainer.innerHTML = `<code id="code">${c}</code>`;
+
+        document.querySelectorAll('#mm-sel .btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.mm === state.mmMode);
+        });
     }
 
     // 全局解锁函数
@@ -356,7 +504,13 @@ ${state.s ? '<span class="k">for</span> chunk <span class="k">in</span> llm.<spa
     // 事件绑定
     document.querySelectorAll('#m-sel .btn').forEach(b => b.onclick = () => {
         document.querySelector('#m-sel .btn.active').classList.remove('active');
-        b.classList.add('active'); state.m = b.dataset.v; state.p = b.dataset.p; draw();
+        b.classList.add('active'); state.m = b.dataset.v; state.p = b.dataset.p;
+        if (state.m !== 'Qwen3.5-35B' && state.m !== 'Qwen3.5-9B') state.mmMode = 'text';
+        draw();
+    });
+    document.querySelectorAll('#mm-sel .btn').forEach(b => b.onclick = () => {
+        document.querySelector('#mm-sel .btn.active').classList.remove('active');
+        b.classList.add('active'); state.mmMode = b.dataset.mm; draw();
     });
     document.querySelectorAll('#t-sel .btn').forEach(b => b.onclick = () => {
         document.querySelector('#t-sel .btn.active').classList.remove('active');

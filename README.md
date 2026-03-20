@@ -39,14 +39,22 @@
 | 模型 | 用途 | 推荐量化 | 下载方式 |
 |------|------|----------|----------|
 | [Gemma 3 27B Instruct](https://huggingface.co/google/gemma-3-27b-it) | 通用对话、代码生成 | Q4_K_M | 使用 [llama.cpp 转换](https://github.com/ggml-org/llama.cpp#convert-hugging-face-model-to-gguf) 或从社区获取 `gemma-3-27b-it-Q4_K_M.gguf` |
-| [Qwen3.5 35B A3B](https://huggingface.co/Qwen/Qwen3.5-35B-A3B) | 金融语境、公文写作 | Q4_K_M | 同上，获取 `Qwen3.5-35B-A3B-Q4_K_M.gguf` |
+| [Qwen3.5 35B A3B](https://huggingface.co/Qwen/Qwen3.5-35B-A3B) | 金融语境、公文写作、**图像理解 (VLM)** | Q4_K_M | 同上，获取 `Qwen3.5-35B-A3B-Q4_K_M.gguf` |
+| [Qwen3.5 9B](https://huggingface.co/Qwen/Qwen2.5-7B-Instruct) | 高速推理、OCR 校验、**图像理解 (VLM)** | Q4_K_M | 同上，获取 `Qwen3.5-9B-Q4_K_M.gguf` |
+| Qwen3.5-35B mmproj（视觉投影器）| Qwen3.5-35B 的多模态视觉编码组件 | FP16 | 与上方 35B 模型配套，获取 `mmproj-F16_qwen35-35.gguf` |
+| Qwen3.5-9B mmproj（视觉投影器）| Qwen3.5-9B 的多模态视觉编码组件 | FP16 | 与上方 9B 模型配套，获取 `mmproj-F16_qwen35-9.gguf` |
+
+> **什么是 mmproj？** mmproj（multimodal projector，多模态投影器）是 llama.cpp 实现视觉语言模型（VLM）的关键组件。它扮演"视觉编码器"的角色：将输入图片转化为模型可理解的向量表示，再与文本 token 一起送入语言模型。启动时通过 `--mmproj` 参数加载，与主模型 `.gguf` 文件**分开存储**，便于版本管理与按需加载。
 
 **目录结构要求：**
 
 ```
-models/
+Models/
 ├── gemma-3-27b-it-Q4_K_M.gguf
-└── Qwen3.5-35B-A3B-Q4_K_M.gguf
+├── Qwen3.5-35B-A3B-Q4_K_M.gguf
+├── Qwen3.5-9B-Q4_K_M.gguf
+├── mmproj-F16_qwen35-35.gguf
+└── mmproj-F16_qwen35-9.gguf
 ```
 
 ---
@@ -317,6 +325,7 @@ sudo systemctl restart docker
 | **连续批处理 (Continuous Batching)** | 流式请求插入，在不增加首字延迟的情况下显著提升吞吐量 |
 | **OpenAI 兼容 API** | 暴露 `/v1/chat/completions` 等标准路径，可直接对接 OpenAI SDK、LangChain 等 |
 | **多 GPU 物理隔离** | 通过 Docker 将不同模型映射至独立 GPU，互不干扰 |
+| **视觉语言模型 (VLM)** | 通过 `--mmproj` 参数加载视觉投影器，支持图像 + 文本混合输入；**`image_url` 兼容 OpenAI 约定**，可使用 **`data:image/…;base64,…`（内嵌 Base64）** 或 **`http(s)://…` 可访问图片 URL** |
 
 ### 2. 镜像下载（有网环境）
 
@@ -358,9 +367,12 @@ docker load -i nginx_alpine_amd64.tar
 
 ```
 glm-deploy/
-├── models/
+├── Models/
 │   ├── gemma-3-27b-it-Q4_K_M.gguf
-│   └── Qwen3.5-35B-A3B-Q4_K_M.gguf
+│   ├── Qwen3.5-35B-A3B-Q4_K_M.gguf
+│   ├── Qwen3.5-9B-Q4_K_M.gguf
+│   ├── mmproj-F16_qwen35-35.gguf      ← Qwen3.5-35B 视觉投影器
+│   └── mmproj-F16_qwen35-9.gguf       ← Qwen3.5-9B 视觉投影器
 ├── www/
 │   └── index.html           # API 使用文档页端
 ├── nginx/
@@ -375,7 +387,7 @@ glm-deploy/
 docker-compose up -d
 ```
 
-所有节点显示为绿色（Up）即表示启动成功。服务对外暴露端口 **80**（API 门户）、**8080**（Gemma）、**8081**（Qwen）。
+所有节点显示为绿色（Up）即表示启动成功。服务对外暴露端口 **80**（API 门户）、**8080**（Gemma）、**8081**（Qwen 35B VLM）、**8082**（Qwen 9B VLM）。
 
 ### 6. nginx.conf 配置
 
@@ -395,7 +407,7 @@ server {
 
 ### 7. 页端访问
 
-启动后，在浏览器访问 **http://\<服务器IP\>:80/** 即可打开 **API 使用文档页**，提供 cURL、Requests、OpenAI SDK、Node.js、LangChain 等多种调用示例，支持一键复制。
+启动后，在浏览器访问 **http://\<服务器IP\>:80/** 即可打开 **API 使用文档页**，提供 cURL、Requests、OpenAI SDK、Node.js、LangChain 等多种调用示例，支持一键复制。选择 Qwen（8081/8082）并切换到 **「多模态 (图像+文本)」** 时，示例代码会演示如何通过 **Base64 Data URL** 传图。
 
 ### 8. 验证与调用
 
@@ -405,11 +417,45 @@ curl -X POST http://localhost:8080/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"model": "gemma-3-27b-it-Q4_K_M", "messages": [{"role": "user", "content": "你好"}]}'
 
-# 健康检查（Qwen 3.5 35B）
+# 健康检查（Qwen 3.5 35B VLM）
 curl -X POST http://localhost:8081/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"model": "Qwen3.5-35B-A3B-Q4_K_M", "messages": [{"role": "user", "content": "你好"}]}'
+
+# 健康检查（Qwen 3.5 9B VLM）
+curl -X POST http://localhost:8082/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model": "Qwen3.5-9B-Q4_K_M", "messages": [{"role": "user", "content": "你好"}]}'
+
+# 多模态图像理解测试（以 Base64 编码图片为例，适用于 8081/8082）
+curl -X POST http://localhost:8081/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "Qwen3.5-35B-A3B-Q4_K_M",
+    "messages": [{
+      "role": "user",
+      "content": [
+        {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64,<YOUR_BASE64>"}},
+        {"type": "text", "text": "请描述图片中的内容。"}
+      ]
+    }]
+  }'
 ```
+
+#### 多模态传图方式说明（Base64 与 URL）
+
+Qwen VLM 节点（**8081** / **8082**）已按 **OpenAI Chat Completions** 的常见约定解析图片，无需单独上传接口：
+
+| 方式 | `image_url.url` 格式 | 适用场景 |
+|------|----------------------|----------|
+| **Base64 Data URL** | `data:image/jpeg;base64,<标准 Base64 载荷>`（亦可用 `png`、`webp` 等与模型/解码器支持的 MIME） | **纯内网、离线批处理**；图片由调用方读入并内嵌到 JSON，不依赖推理机访问外网 |
+| **HTTP(S) URL** | `https://example.com/image.jpg` 等可被 **llama.cpp 容器内网络** 访问的地址 | 图片托管在对象存储或内网文件服务上时可减少请求体体积 |
+
+**要点：**
+
+- `messages` 里 `role: "user"` 的 `content` 为**数组**时，可同时包含多个 `image_url` 与 `text` 块；顺序一般建议 **先图后文**（与 OpenAI 多模态习惯一致）。
+- 将本地文件转为 Base64 时，载荷部分 **不要** 再带 `data:image/...;base64,` 前缀——该前缀仅在最终写入 `url` 字段时使用一次。
+- 若使用 URL 传图，请确认容器到该地址的网络与 DNS 可达；**离线环境优先使用 Base64**。
 
 > **注意：** 若使用离线导入的镜像，需确保 `docker-compose.yml` 中的 `image` 名称与 `docker load` 后的镜像名一致。
 
@@ -427,7 +473,9 @@ curl -X POST http://localhost:8081/v1/chat/completions \
 | 五 | 推理服务启动 | `docker-compose ps` 全部 Up |
 | 五 | 页端可访问 | 浏览器打开 `http://<IP>:80/` |
 | 五 | Gemma 可用 | `curl -X POST http://localhost:8080/v1/chat/completions ...` |
-| 五 | Qwen 可用 | `curl -X POST http://localhost:8081/v1/chat/completions ...` |
+| 五 | Qwen 35B VLM 可用 | `curl -X POST http://localhost:8081/v1/chat/completions ...` |
+| 五 | Qwen 9B VLM 可用 | `curl -X POST http://localhost:8082/v1/chat/completions ...` |
+| 五 | 多模态图像输入可用 | 向 8081/8082 发送含 `image_url` 的请求（`data:image/...;base64,...` 或可达的 `http(s)://...`），确认返回图像描述 |
 
 ---
 
@@ -439,8 +487,11 @@ curl -X POST http://localhost:8081/v1/chat/completions \
 
 | 类别 | 本地路径 | 资源 | 下载链接 |
 |------|----------|------|----------|
-| **模型** | `models/` | Gemma 3 27B Q4_K_M GGUF | Hugging Face / 社区转换 |
-| **模型** | `models/` | Qwen3.5 35B A3B Q4_K_M GGUF | Hugging Face / 社区转换 |
+| **模型** | `Models/` | Gemma 3 27B Q4_K_M GGUF | Hugging Face / 社区转换 |
+| **模型** | `Models/` | Qwen3.5 35B A3B Q4_K_M GGUF | Hugging Face / 社区转换 |
+| **模型** | `Models/` | Qwen3.5 9B Q4_K_M GGUF | Hugging Face / 社区转换 |
+| **模型（mmproj）** | `Models/` | mmproj-F16_qwen35-35.gguf（Qwen 35B 视觉投影器）| Hugging Face / 社区转换 |
+| **模型（mmproj）** | `Models/` | mmproj-F16_qwen35-9.gguf（Qwen 9B 视觉投影器）| Hugging Face / 社区转换 |
 | **镜像** | `Images/` | llama.cpp server-cuda | `docker pull ghcr.io/ggml-org/llama.cpp:server-cuda` |
 | **镜像** | `Images/` | Nginx Alpine | `docker pull nginx:alpine` |
 | 一 | `Base/Kernel_Base/` | kernel / kernel-devel / kernel-headers | [麒麟 V10SP1.1 Packages](https://update.cs2c.com.cn/NS/V10/V10SP1.1/os/adv/lic/updates/x86_64/Packages/) |
