@@ -38,12 +38,12 @@
         .blink { width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-        main { display: flex; flex: 1; overflow: hidden; }
+        main { display: flex; flex: 1; overflow: hidden; min-height: 0; }
 
         /* 左侧面板 */
         .sidebar {
-            width: 320px; background: var(--bg-panel); border-right: 1px solid var(--border);
-            padding: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem;
+            width: 280px; flex-shrink: 0; background: var(--bg-panel); border-right: 1px solid var(--border);
+            padding: 1.25rem; display: flex; flex-direction: column; gap: 1.25rem;
         }
         .side-label { font-size: 0.7rem; color: var(--brand-cyan); font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
         
@@ -62,9 +62,10 @@
         .addr { font-family: monospace; font-size: 0.7rem; color: var(--text-dim); margin-top: 5px; display: block; }
         .addr.locked { color: #ef4444; }
 
-        /* 中间面板 */
+        /* 中间面板（与右侧按 flex 比例分配宽余空间） */
         .doc-center {
-            flex: 1; padding: 2rem 3rem; overflow-y: auto; background: linear-gradient(135deg, #050a14 0%, #0f172a 100%);
+            flex: 1 1 360px; min-width: 220px; min-height: 0;
+            padding: 1.75rem 2rem; overflow-y: auto; background: linear-gradient(135deg, #050a14 0%, #0f172a 100%);
         }
         .doc-section { margin-bottom: 3rem; }
         .doc-section h2 { font-size: 1.5rem; color: #fff; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; }
@@ -73,13 +74,14 @@
         .tech-list { margin: 0; padding-left: 1.2rem; color: var(--text-dim); font-size: 0.95rem; }
         .tech-list li { margin-bottom: 1rem; }
 
-        /* 右侧代码实验室 */
+        /* 右侧代码实验室（较原固定 520px 更易随屏变宽；纵向留给 pre 滚动） */
         .playground {
-            width: 520px; background: #0f172a; border-left: 1px solid var(--border);
-            padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;
+            flex: 1.35 1 540px; min-width: 460px; max-width: 72rem;
+            min-height: 0; background: #0f172a; border-left: 1px solid var(--border);
+            padding: 1rem 1.1rem 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.65rem;
         }
-        .control-unit { background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
-        .control-unit .label { font-size: 0.7rem; font-weight: 800; color: var(--brand-cyan); margin-bottom: 0.8rem; display: block; }
+        .control-unit { flex-shrink: 0; background: rgba(0,0,0,0.2); padding: 0.7rem 0.85rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
+        .control-unit .label { font-size: 0.7rem; font-weight: 800; color: var(--brand-cyan); margin-bottom: 0.55rem; display: block; }
 
         .btn-row { display: flex; gap: 5px; background: #000; padding: 3px; border-radius: 6px; }
         .btn {
@@ -96,7 +98,7 @@
 
         /* 代码区 */
         .code-win {
-            flex: 1; background: var(--code-bg); border-radius: 8px; border: 1px solid #30363d;
+            flex: 1 1 auto; min-height: 0; background: var(--code-bg); border-radius: 8px; border: 1px solid #30363d;
             display: flex; flex-direction: column; overflow: hidden; position: relative;
         }
         .code-head {
@@ -107,8 +109,8 @@
         .copy-btn:hover { background: #30363d; color: var(--brand-cyan); }
 
         pre { 
-            margin: 0; padding: 1.2rem; overflow: auto; height: 100%;
-            font-family: 'JetBrains Mono', 'Consolas', monospace; font-size: 0.85rem; line-height: 1.6; color: #d1d5db;
+            margin: 0; padding: 1rem 1.15rem; overflow: auto; flex: 1 1 auto; min-height: 0;
+            font-family: 'JetBrains Mono', 'Consolas', monospace; font-size: 0.82rem; line-height: 1.55; color: #d1d5db;
         }
         .k { color: #ff7b72; } .s { color: #a5d6ff; } .f { color: #d2a8ff; } .a { color: #ffa657; } .n { color: #79c0ff; }
 
@@ -130,6 +132,25 @@
         .pwd-btn:hover { background: var(--brand-cyan); color: #000; }
         .pwd-row { display: flex; align-items: center; margin-top: 20px; }
         .err-msg { color: #ef4444; font-size: 0.75rem; margin-top: 10px; opacity: 0; transition: 0.3s; }
+
+        /* 多模态辅助平台提示 */
+        .platform-banner {
+            background: linear-gradient(90deg, rgba(0, 102, 255, 0.18), rgba(0, 229, 255, 0.12));
+            border-bottom: 1px solid var(--border);
+            padding: 0.7rem 2rem;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            line-height: 1.55;
+            text-align: center;
+        }
+        .platform-banner strong { color: #fff; }
+        .platform-banner a {
+            color: var(--brand-cyan);
+            font-weight: 800;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .platform-banner a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -145,6 +166,11 @@
         集群状态: 运行中 (NVIDIA 架构加速已开启)
     </div>
 </header>
+
+<div class="platform-banner">
+    <strong>图片调用辅助：</strong>为方便将图片接入大模型解析，行内已搭建 <strong>Base64 ↔ 图片</strong> 与 <strong>图片生成可访问 URL</strong> 的平台，可按需访问
+    <a href="http://imgurl.cs.icbc" target="_blank" rel="noopener noreferrer">http://imgurl.cs.icbc</a>
+</div>
 
 <main>
     <div class="sidebar">
@@ -235,8 +261,9 @@
                 <button class="btn active" data-mm="text">纯文本对话</button>
                 <button class="btn" data-mm="mm">多模态 (图像+文本)</button>
             </div>
-            <div style="font-size:0.65rem;color:var(--text-dim);margin-top:0.5rem;line-height:1.5;">
-                多模态示例使用 OpenAI 兼容的 <code style="color:var(--brand-cyan);">image_url</code>（支持 <code>data:image/...;base64,</code> 或公网 URL）。请将 <code>&lt;BASE64&gt;</code> 或路径替换为实际图片。
+            <div style="font-size:0.65rem;color:var(--text-dim);margin-top:0.5rem;line-height:1.55;">
+                多模态示例使用 OpenAI 兼容的 <code style="color:var(--brand-cyan);">image_url</code>，默认演示为<strong>内网示例图 URL</strong>（可直接调用）；亦支持 <code>data:image/...;base64,...</code>。若需将本地图转为 Base64 或生成可访问链接，请使用
+                <a href="http://imgurl.cs.icbc" target="_blank" rel="noopener noreferrer" style="color:var(--brand-cyan);font-weight:700;">imgurl.cs.icbc</a>。
             </div>
         </div>
 
@@ -255,6 +282,8 @@
     const state = { m: 'Gemma3-27B', p: '8080', t: 'curl', s: false, mmMode: 'text' };
     const api_host = 'api0.brdc-ai.cs.icbc';
     const api_key = 'sk-brdc-ai-cluster';
+    /** Qwen 多模态示例用内网图片（Gemma 逻辑不使用） */
+    const MM_SAMPLE_IMAGE_URL = 'http://aicode.cs.icbc/icbc/codeweb/static/img/empty.13b7701e.png';
     let gemmaUnlocked = false; // Gemma3 解锁状态
 
     /** 与 docker-compose --alias 一致，供 API 请求使用 */
@@ -329,7 +358,7 @@
     "messages": [{
       "role": "user",
       "content": [
-        {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64,&lt;BASE64&gt;"}},
+        {"type": "image_url", "image_url": {"url": "${MM_SAMPLE_IMAGE_URL}"}},
         {"type": "text", "text": "${mmPrompt}"}
       ]
     }],
@@ -338,15 +367,14 @@
             } else if (state.t === 'py') {
                 fn.innerText = "client_multimodal.py";
                 c = state.s ?
-`<span class="k">import</span> base64, requests, json
-<span class="k">with</span> <span class="f">open</span>(<span class="s">"receipt.jpg"</span>, <span class="s">"rb"</span>) <span class="k">as</span> f:
-    b64 = base64.<span class="f">b64encode</span>(f.read()).<span class="f">decode</span>()
+`<span class="k">import</span> requests, json
+IMAGE_URL = <span class="s">"${MM_SAMPLE_IMAGE_URL}"</span>
 payload = {
     <span class="s">"model"</span>: <span class="s">"${model}"</span>,
     <span class="s">"messages"</span>: [{
         <span class="s">"role"</span>: <span class="s">"user"</span>,
         <span class="s">"content"</span>: [
-            {<span class="s">"type"</span>: <span class="s">"image_url"</span>, <span class="s">"image_url"</span>: {<span class="s">"url"</span>: <span class="s">f"data:image/jpeg;base64,{b64}"</span>}},
+            {<span class="s">"type"</span>: <span class="s">"image_url"</span>, <span class="s">"image_url"</span>: {<span class="s">"url"</span>: IMAGE_URL}},
             {<span class="s">"type"</span>: <span class="s">"text"</span>, <span class="s">"text"</span>: <span class="s">"${mmPrompt}"</span>}
         ]
     }],
@@ -358,15 +386,14 @@ resp = requests.<span class="f">post</span>(<span class="s">"${url}/chat/complet
         data = line.<span class="f">decode</span>(<span class="s">'utf-8'</span>)[<span class="n">6</span>:]
         <span class="k">if</span> data <span class="k">and</span> data != <span class="s">"[DONE]"</span>:
             <span class="f">print</span>(json.<span class="f">loads</span>(data)[<span class="s">'choices'</span>][<span class="n">0</span>][<span class="s">'delta'</span>].<span class="f">get</span>(<span class="s">'content'</span>, <span class="s">''</span>), end=<span class="s">''</span>, flush=<span class="k">True</span>)` :
-`<span class="k">import</span> base64, requests
-<span class="k">with</span> <span class="f">open</span>(<span class="s">"receipt.jpg"</span>, <span class="s">"rb"</span>) <span class="k">as</span> f:
-    b64 = base64.<span class="f">b64encode</span>(f.read()).<span class="f">decode</span>()
+`<span class="k">import</span> requests
+IMAGE_URL = <span class="s">"${MM_SAMPLE_IMAGE_URL}"</span>
 resp = requests.<span class="f">post</span>(<span class="s">"${url}/chat/completions"</span>, json={
     <span class="s">"model"</span>: <span class="s">"${model}"</span>,
     <span class="s">"messages"</span>: [{
         <span class="s">"role"</span>: <span class="s">"user"</span>,
         <span class="s">"content"</span>: [
-            {<span class="s">"type"</span>: <span class="s">"image_url"</span>, <span class="s">"image_url"</span>: {<span class="s">"url"</span>: <span class="s">f"data:image/jpeg;base64,{b64}"</span>}},
+            {<span class="s">"type"</span>: <span class="s">"image_url"</span>, <span class="s">"image_url"</span>: {<span class="s">"url"</span>: IMAGE_URL}},
             {<span class="s">"type"</span>: <span class="s">"text"</span>, <span class="s">"text"</span>: <span class="s">"${mmPrompt}"</span>}
         ]
     }]
@@ -375,14 +402,12 @@ resp = requests.<span class="f">post</span>(<span class="s">"${url}/chat/complet
             } else if (state.t === 'sdk') {
                 fn.innerText = "openai_multimodal.py";
                 c = `<span class="k">from</span> openai <span class="k">import</span> OpenAI
-<span class="k">import</span> base64
-<span class="k">with</span> <span class="f">open</span>(<span class="s">"receipt.jpg"</span>, <span class="s">"rb"</span>) <span class="k">as</span> f:
-    b64 = base64.<span class="f">b64encode</span>(f.read()).<span class="f">decode</span>()
+IMAGE_URL = <span class="s">"${MM_SAMPLE_IMAGE_URL}"</span>
 client = <span class="f">OpenAI</span>(base_url=<span class="s">"${url}"</span>, api_key=<span class="s">"${api_key}"</span>)
 user_msg = {
     <span class="s">"role"</span>: <span class="s">"user"</span>,
     <span class="s">"content"</span>: [
-        {<span class="s">"type"</span>: <span class="s">"image_url"</span>, <span class="s">"image_url"</span>: {<span class="s">"url"</span>: <span class="s">f"data:image/jpeg;base64,{b64}"</span>}},
+        {<span class="s">"type"</span>: <span class="s">"image_url"</span>, <span class="s">"image_url"</span>: {<span class="s">"url"</span>: IMAGE_URL}},
         {<span class="s">"type"</span>: <span class="s">"text"</span>, <span class="s">"text"</span>: <span class="s">"${mmPrompt}"</span>}
     ]
 }
@@ -394,16 +419,15 @@ resp = client.chat.completions.<span class="f">create</span>(
 ${state.s ? '<span class="k">for</span> chunk <span class="k">in</span> resp: <span class="f">print</span>(chunk.choices[<span class="n">0</span>].delta.content <span class="k">or</span> <span class="s">""</span>, end=<span class="s">""</span>)' : '<span class="f">print</span>(resp.choices[<span class="n">0</span>].message.content)'}`;
             } else if (state.t === 'node') {
                 fn.innerText = "multimodal.mjs";
-                c = `<span class="k">import</span> fs <span class="k">from</span> <span class="s">"fs"</span>;
-<span class="k">import</span> OpenAI <span class="k">from</span> <span class="s">"openai"</span>;
-<span class="k">const</span> b64 = fs.<span class="f">readFileSync</span>(<span class="s">"receipt.jpg"</span>).<span class="f">toString</span>(<span class="s">"base64"</span>);
+                c = `<span class="k">import</span> OpenAI <span class="k">from</span> <span class="s">"openai"</span>;
+<span class="k">const</span> imageUrl = <span class="s">"${MM_SAMPLE_IMAGE_URL}"</span>;
 <span class="k">const</span> api = <span class="k">new</span> <span class="f">OpenAI</span>({ baseURL: <span class="s">"${url}"</span>, apiKey: <span class="s">"${api_key}"</span> });
 <span class="k">const</span> res = <span class="k">await</span> api.chat.completions.<span class="f">create</span>({
     model: <span class="s">"${model}"</span>,
     messages: [{
         role: <span class="s">"user"</span>,
         content: [
-            { type: <span class="s">"image_url"</span>, image_url: { url: <span class="s">\`data:image/jpeg;base64,\${b64}\`</span> } },
+            { type: <span class="s">"image_url"</span>, image_url: { url: imageUrl } },
             { type: <span class="s">"text"</span>, text: <span class="s">"${mmPrompt}"</span> }
         ]
     }],
@@ -412,18 +436,16 @@ ${state.s ? '<span class="k">for</span> chunk <span class="k">in</span> resp: <s
 ${state.s ? '<span class="k">for await</span> (<span class="k">const</span> chunk <span class="k">of</span> res) { process.stdout.<span class="f">write</span>(chunk.choices[<span class="n">0</span>]?.delta?.content || <span class="s">""</span>); }' : 'console.<span class="f">log</span>(res.choices[<span class="n">0</span>].message.content);'}`;
             } else if (state.t === 'lc') {
                 fn.innerText = "chain_multimodal.py";
-                c = `<span class="k">import</span> base64
-<span class="k">from</span> langchain_core.messages <span class="k">import</span> HumanMessage
+                c = `<span class="k">from</span> langchain_core.messages <span class="k">import</span> HumanMessage
 <span class="k">from</span> langchain_openai <span class="k">import</span> ChatOpenAI
-<span class="k">with</span> <span class="f">open</span>(<span class="s">"receipt.jpg"</span>, <span class="s">"rb"</span>) <span class="k">as</span> f:
-    b64 = base64.<span class="f">b64encode</span>(f.read()).<span class="f">decode</span>()
+IMAGE_URL = <span class="s">"${MM_SAMPLE_IMAGE_URL}"</span>
 llm = <span class="f">ChatOpenAI</span>(
     openai_api_base=<span class="s">"${url}"</span>,
     openai_api_key=<span class="s">"${api_key}"</span>,
     model_name=<span class="s">"${model}"</span>
 )
 msg = <span class="f">HumanMessage</span>(content=[
-    {<span class="s">"type"</span>: <span class="s">"image_url"</span>, <span class="s">"image_url"</span>: {<span class="s">"url"</span>: <span class="s">f"data:image/jpeg;base64,{b64}"</span>}},
+    {<span class="s">"type"</span>: <span class="s">"image_url"</span>, <span class="s">"image_url"</span>: {<span class="s">"url"</span>: IMAGE_URL}},
     {<span class="s">"type"</span>: <span class="s">"text"</span>, <span class="s">"text"</span>: <span class="s">"${mmPrompt}"</span>}
 ])
 <span class="f">print</span>(llm.<span class="f">invoke</span>([msg]).content)`;
