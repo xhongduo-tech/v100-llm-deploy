@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,14 +9,18 @@
         (function () {
             try {
                 var t = localStorage.getItem('brdc-theme');
-                if (t !== 'light' && t !== 'dark') t = 'dark';
+                if (t !== 'light' && t !== 'dark') t = 'light';
                 document.documentElement.setAttribute('data-theme', t);
-            } catch (e) { document.documentElement.setAttribute('data-theme', 'dark'); }
+            } catch (e) { document.documentElement.setAttribute('data-theme', 'light'); }
         })();
     </script>
     <style>
         :root {
             --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+            --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
         }
 
         [data-theme="dark"] {
@@ -49,6 +53,7 @@
             --doc-gradient: linear-gradient(145deg, #030712 0%, #0f172a 48%, #0c1222 100%);
             --banner-grad: linear-gradient(90deg, rgba(59, 130, 246, 0.2), rgba(34, 211, 238, 0.1));
             --k: #ff7b72; --s: #a5d6ff; --f: #d2a8ff; --a: #ffa657; --n: #79c0ff;
+            --focus-ring: 0 0 0 3px rgba(34, 211, 238, 0.28);
         }
 
         [data-theme="light"] {
@@ -81,31 +86,56 @@
             --doc-gradient: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
             --banner-grad: linear-gradient(90deg, rgba(37, 99, 235, 0.12), rgba(8, 145, 178, 0.08));
             --k: #b91c1c; --s: #0369a1; --f: #6d28d9; --a: #c2410c; --n: #1d4ed8;
+            --focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.32);
         }
 
         * { box-sizing: border-box; }
+        ::selection {
+            background: rgba(37, 99, 235, 0.16);
+            color: inherit;
+        }
+        [data-theme="dark"] ::selection {
+            background: rgba(34, 211, 238, 0.22);
+        }
         html { transition: background-color 0.28s var(--ease-out); }
         body {
             background-color: var(--bg-dark);
             color: var(--text-main);
-            font-family: 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+            font-family: 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, 'Segoe UI', sans-serif;
+            font-size: 15px;
+            line-height: 1.55;
             margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden;
             transition: background-color 0.28s var(--ease-out), color 0.22s var(--ease-out);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         /* 顶部状态栏 */
         header {
-            height: 58px;
+            height: 56px;
+            min-height: 56px;
             background: var(--bg-elevated);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
+            backdrop-filter: blur(16px) saturate(1.2);
+            -webkit-backdrop-filter: blur(16px) saturate(1.2);
             border-bottom: 1px solid var(--border);
-            padding: 0 1.75rem;
+            padding: 0 clamp(1rem, 3vw, 2rem);
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 100;
             box-shadow: var(--shadow-header);
+            position: relative;
+        }
+        header::after {
+            content: '';
+            position: absolute;
+            left: 0; right: 0; bottom: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.15), transparent);
+            pointer-events: none;
+            opacity: 0.9;
+        }
+        [data-theme="light"] header::after {
+            background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.12), transparent);
         }
         .logo-box { display: flex; align-items: center; gap: 14px; }
         .header-divider { width: 1px; height: 18px; background: var(--header-divider); flex-shrink: 0; border-radius: 1px; }
@@ -179,17 +209,40 @@
             box-shadow: var(--shadow-card);
             transition: background-color 0.28s var(--ease-out);
         }
-        .side-label { font-size: 0.68rem; color: var(--brand-cyan); font-weight: 900; text-transform: uppercase; letter-spacing: 0.14em; }
+        .side-label {
+            font-size: 0.65rem;
+            color: var(--brand-cyan);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+        .side-label::before {
+            content: '';
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--brand-blue), var(--brand-cyan));
+            flex-shrink: 0;
+            opacity: 0.9;
+        }
         
         .stat-box { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
         .stat-card {
             background: var(--stat-card-bg);
             padding: 0.65rem 0.55rem;
-            border-radius: 10px;
+            border-radius: var(--radius-sm);
             border: 1px solid var(--border);
-            transition: transform 0.2s, border-color 0.2s;
+            transition: transform 0.22s var(--ease-out), border-color 0.22s, box-shadow 0.22s;
         }
-        .stat-card:hover { border-color: rgba(34, 211, 238, 0.35); }
+        .stat-card:hover {
+            border-color: rgba(34, 211, 238, 0.35);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+        }
+        [data-theme="dark"] .stat-card:hover { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35); }
         [data-theme="light"] .stat-card:hover { border-color: rgba(37, 99, 235, 0.28); }
         .stat-n { font-size: 0.6rem; color: var(--text-dim); }
         .stat-v { font-size: 0.82rem; color: var(--gold); font-weight: 800; margin-top: 4px; letter-spacing: -0.02em; }
@@ -197,15 +250,18 @@
         .mini-card {
             background: var(--mini-card-bg);
             border: 1px solid var(--border);
-            border-radius: 11px;
-            padding: 0.85rem;
+            border-radius: var(--radius-md);
+            padding: 0.85rem 0.9rem;
             margin-bottom: 0.65rem;
             cursor: default;
-            transition: border-color 0.22s, box-shadow 0.22s;
+            transition: border-color 0.22s, box-shadow 0.22s, transform 0.22s var(--ease-out);
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
         }
         [data-theme="dark"] .mini-card { box-shadow: none; }
-        .mini-card:hover { border-color: rgba(34, 211, 238, 0.38); }
+        .mini-card:hover {
+            border-color: rgba(34, 211, 238, 0.38);
+            transform: translateY(-1px);
+        }
         [data-theme="light"] .mini-card:hover { border-color: rgba(37, 99, 235, 0.3); }
         .mini-card h4 { margin: 0; font-size: 0.92rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; color: var(--heading-strong); }
         .tps-tag { font-size: 0.65rem; color: var(--brand-cyan); border: 1px solid rgba(34, 211, 238, 0.45); padding: 1px 6px; border-radius: 4px; font-weight: 700; }
@@ -217,10 +273,24 @@
         /* 中间面板（与右侧按 flex 比例分配宽余空间） */
         .doc-center {
             flex: 1 1 360px; min-width: 220px; min-height: 0;
-            padding: 1.75rem 2rem; overflow-y: auto;
+            padding: 1.75rem clamp(1.25rem, 3vw, 2rem);
+            overflow-y: auto;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            scrollbar-gutter: stable;
             background: var(--doc-gradient);
             transition: background 0.3s var(--ease-out);
         }
+        .doc-center::-webkit-scrollbar { width: 8px; }
+        .doc-center::-webkit-scrollbar-track { background: transparent; }
+        .doc-center::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 99px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+        .doc-center::-webkit-scrollbar-thumb:hover { background: var(--text-dim); background-clip: padding-box; }
+        .doc-center { scrollbar-color: var(--border) transparent; scrollbar-width: thin; }
         .doc-section { margin-bottom: 2.5rem; }
         .doc-section h2 {
             font-size: 1.35rem;
@@ -251,15 +321,41 @@
         }
         .tech-box p { margin: 0 0 0.75rem; color: var(--text-main); }
         .tech-list { margin: 0; padding-left: 1.15rem; color: var(--text-dim); font-size: 0.92rem; }
-        .tech-list li { margin-bottom: 0.85rem; }
+        .tech-list li { margin-bottom: 0.85rem; padding-left: 0.15rem; }
+        .tech-list li::marker { color: var(--brand-cyan); font-size: 0.85em; }
+        [data-theme="light"] .tech-list li::marker { color: var(--brand-blue); }
         .tech-list li strong { color: var(--text-main); }
 
         /* 右侧代码实验室（较原固定 520px 更易随屏变宽；纵向留给 pre 滚动） */
         .playground {
             flex: 1.35 1 540px; min-width: 460px; max-width: 72rem;
             min-height: 0; background: var(--bg-panel); border-left: 1px solid var(--border);
-            padding: 1rem 1.1rem 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.65rem;
+            padding: 0.85rem 1.1rem 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.6rem;
             transition: background-color 0.28s var(--ease-out);
+        }
+        .playground-eyebrow {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 0.35rem 1rem;
+            padding-bottom: 0.35rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 0.15rem;
+        }
+        .playground-eyebrow__title {
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--brand-cyan);
+        }
+        .playground-eyebrow__hint {
+            font-size: 0.68rem;
+            color: var(--text-dim);
+            font-weight: 500;
+            max-width: 20rem;
+            line-height: 1.45;
         }
         .control-unit {
             flex-shrink: 0;
@@ -272,11 +368,50 @@
         [data-theme="light"] .control-unit { background: #f1f5f9; }
         .control-unit .label { font-size: 0.68rem; font-weight: 800; color: var(--brand-cyan); margin-bottom: 0.55rem; display: block; letter-spacing: 0.04em; }
 
+        .mm-hint {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            margin-top: 0.5rem;
+            line-height: 1.65;
+        }
+        .mm-hint-code {
+            font-family: 'JetBrains Mono', ui-monospace, monospace;
+            font-size: 0.62rem;
+            color: var(--brand-cyan);
+            background: rgba(15, 23, 42, 0.06);
+            padding: 0.12em 0.4em;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+        [data-theme="dark"] .mm-hint-code {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        .mm-hint-link {
+            color: var(--brand-cyan);
+            font-weight: 700;
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.15s;
+        }
+        .mm-hint-link:hover { border-bottom-color: var(--brand-cyan); }
+        .mm-hint-link:focus-visible {
+            outline: none;
+            border-radius: 3px;
+            box-shadow: var(--focus-ring);
+        }
+
+        .mm-img-wrap { margin-top: 0.75rem; padding-top: 0.65rem; border-top: 1px solid var(--border); }
+        .mm-img-wrap__label { margin-top: 0 !important; }
+        .mm-hint--sub { margin-top: 0.45rem !important; font-size: 0.62rem !important; line-height: 1.55 !important; }
+
         .btn-row { display: flex; gap: 4px; background: var(--btn-row-bg); padding: 4px; border-radius: 9px; border: 1px solid var(--border); }
         .btn {
             flex: 1; background: transparent; border: none; color: var(--text-dim);
-            padding: 7px 2px; border-radius: 7px; cursor: pointer; font-size: 0.72rem; font-weight: 700; transition: background 0.18s, color 0.18s;
+            padding: 7px 2px; border-radius: 7px; cursor: pointer; font-size: 0.72rem; font-weight: 700;
+            transition: background 0.18s, color 0.18s, transform 0.15s;
         }
+        .btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
         .btn:hover { color: var(--text-main); background: rgba(59, 130, 246, 0.12); }
         [data-theme="light"] .btn:hover { background: rgba(37, 99, 235, 0.1); }
         .btn.active {
@@ -285,8 +420,10 @@
             box-shadow: 0 2px 12px rgba(37, 99, 235, 0.35);
         }
         [data-theme="light"] .btn.active { box-shadow: 0 2px 10px rgba(37, 99, 235, 0.25); }
+        .btn.active:focus-visible { box-shadow: var(--focus-ring), 0 2px 12px rgba(37, 99, 235, 0.35); }
 
-        .stream-switch { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+        .stream-switch { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; border-radius: var(--radius-sm); }
+        .stream-switch:focus-visible { outline: none; box-shadow: var(--focus-ring); }
         .stream-switch .label { margin-bottom: 0 !important; }
         .toggle { width: 38px; height: 20px; background: #64748b; border-radius: 12px; position: relative; transition: background 0.25s; }
         [data-theme="dark"] .toggle { background: #334155; }
@@ -296,12 +433,15 @@
 
         /* 代码区 */
         .code-win {
-            flex: 1 1 auto; min-height: 0; background: var(--code-bg); border-radius: 12px; border: 1px solid var(--code-border);
+            flex: 1 1 auto; min-height: 0; background: var(--code-bg); border-radius: var(--radius-md); border: 1px solid var(--code-border);
             display: flex; flex-direction: column; overflow: hidden; position: relative;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-            transition: background-color 0.25s, border-color 0.25s;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 1px 3px rgba(0, 0, 0, 0.06);
+            transition: background-color 0.25s, border-color 0.25s, box-shadow 0.25s;
         }
-        [data-theme="light"] .code-win { box-shadow: inset 0 1px 0 rgba(255,255,255,0.85); }
+        [data-theme="dark"] .code-win { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06); }
+        [data-theme="light"] .code-win {
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 2px 8px rgba(15, 23, 42, 0.06);
+        }
         .code-head {
             background: var(--code-head-bg);
             padding: 9px 14px;
@@ -323,14 +463,24 @@
         [data-theme="light"] .copy-btn { background: #fff; }
         .copy-btn:hover { background: rgba(34, 211, 238, 0.12); color: var(--brand-cyan); border-color: rgba(34, 211, 238, 0.35); }
         [data-theme="light"] .copy-btn:hover { background: rgba(8, 145, 178, 0.1); border-color: rgba(8, 145, 178, 0.35); }
+        .copy-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
         .copy-btn.copy-btn--ok { color: var(--brand-cyan) !important; border-color: rgba(34, 211, 238, 0.5) !important; }
 
         pre {
             margin: 0; padding: 1rem 1.15rem; overflow: auto; flex: 1 1 auto; min-height: 0;
             font-family: 'JetBrains Mono', 'Consolas', ui-monospace, monospace;
-            font-size: 0.82rem; line-height: 1.55; color: var(--pre-fg);
+            font-size: 0.8125rem; line-height: 1.6; color: var(--pre-fg);
             transition: color 0.2s;
+            tab-size: 4;
         }
+        pre::-webkit-scrollbar { width: 8px; height: 8px; }
+        pre::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 99px;
+            border: 2px solid var(--code-bg);
+        }
+        pre::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+        pre { scrollbar-color: var(--border) var(--code-bg); scrollbar-width: thin; }
         .k { color: var(--k); } .s { color: var(--s); } .f { color: var(--f); } .a { color: var(--a); } .n { color: var(--n); }
 
         /* 锁屏界面 */
@@ -364,12 +514,26 @@
         .platform-banner {
             background: var(--banner-grad);
             border-bottom: 1px solid var(--border);
-            padding: 0.65rem 1.75rem;
-            font-size: 0.82rem;
+            padding: 0.55rem clamp(1rem, 2vw, 1.75rem);
+            font-size: 0.8125rem;
             color: var(--text-main);
-            line-height: 1.55;
-            text-align: center;
+            line-height: 1.6;
             transition: background 0.3s var(--ease-out);
+            position: relative;
+        }
+        .platform-banner::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0; width: 3px;
+            background: linear-gradient(180deg, var(--brand-blue), var(--brand-cyan));
+            border-radius: 0 2px 2px 0;
+            opacity: 0.85;
+        }
+        .banner-inner {
+            max-width: 72rem;
+            margin: 0 auto;
+            text-align: center;
+            padding-left: 0.25rem;
         }
         .platform-banner strong { color: var(--heading-strong); font-weight: 800; }
         .platform-banner a {
@@ -381,6 +545,32 @@
             transition: border-color 0.2s, color 0.2s;
         }
         .platform-banner a:hover { border-bottom-color: var(--brand-cyan); }
+        .platform-banner a:focus-visible {
+            outline: none;
+            border-radius: 4px;
+            box-shadow: var(--focus-ring);
+        }
+
+        .code-filename {
+            font-family: 'JetBrains Mono', ui-monospace, monospace;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            letter-spacing: 0.02em;
+        }
+
+        .pwd-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            .doc-center { scroll-behavior: auto; }
+            .blink { animation: none; opacity: 1; }
+            .stat-card:hover, .mini-card:hover { transform: none; }
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -407,9 +597,11 @@
     </div>
 </header>
 
-<div class="platform-banner">
-    <strong>图片调用辅助：</strong>为方便将图片接入大模型解析，行内已搭建 <strong>Base64 ↔ 图片</strong> 与 <strong>图片生成可访问 URL</strong> 的平台，可按需访问
-    <a href="http://imgurl.cs.icbc" target="_blank" rel="noopener noreferrer">http://imgurl.cs.icbc</a>
+<div class="platform-banner" role="region" aria-label="素材批处理辅助说明">
+    <div class="banner-inner">
+        <strong>素材批处理辅助：</strong>为支持图片与版式素材的批量处理与联调，测试环境已部署统一服务，提供 <strong>Base64 / HTML / SVG</strong> 等格式能力与<strong>批处理流水线</strong>，可按需访问
+        <a href="http://img-gpt.cs.icbc" target="_blank" rel="noopener noreferrer">http://img-gpt.cs.icbc</a>
+    </div>
 </div>
 
 <main>
@@ -470,6 +662,10 @@
     </div>
 
     <div class="playground">
+        <div class="playground-eyebrow">
+            <span class="playground-eyebrow__title">API 调用示例</span>
+            <span class="playground-eyebrow__hint">选择模型与技术栈，按需开启流式；可复制下方代码直接联调。</span>
+        </div>
         <div class="control-unit">
             <span class="label">模型选择</span>
             <div class="btn-row" id="m-sel">
@@ -501,15 +697,23 @@
                 <button class="btn active" data-mm="text">纯文本对话</button>
                 <button class="btn" data-mm="mm">多模态 (图像+文本)</button>
             </div>
-            <div style="font-size:0.65rem;color:var(--text-dim);margin-top:0.5rem;line-height:1.55;">
-                多模态示例使用 OpenAI 兼容的 <code style="color:var(--brand-cyan);">image_url</code>，默认演示为<strong>内网示例图 URL</strong>（可直接调用）；亦支持 <code>data:image/...;base64,...</code>。若需将本地图转为 Base64 或生成可访问链接，请使用
-                <a href="http://imgurl.cs.icbc" target="_blank" rel="noopener noreferrer" style="color:var(--brand-cyan);font-weight:700;">imgurl.cs.icbc</a>。
+            <div class="mm-hint">
+                多模态示例使用 OpenAI 兼容的 <code class="mm-hint-code">image_url</code>。请在下方切换<strong>内网 URL</strong>与<strong>Base64 Data URL</strong>查看对应请求体；亦支持 <code class="mm-hint-code">data:image/jpeg;base64,...</code> 等格式。素材转码与批处理可使用
+                <a href="http://img-gpt.cs.icbc" target="_blank" rel="noopener noreferrer" class="mm-hint-link">img-gpt.cs.icbc</a>。
+            </div>
+            <div id="mm-img-wrap" class="mm-img-wrap" style="display:none;">
+                <span class="label mm-img-wrap__label">图片传入方式</span>
+                <div class="btn-row" id="mm-img-sel">
+                    <button type="button" class="btn active" data-img="url">内网 URL</button>
+                    <button type="button" class="btn" data-img="base64">Base64 Data URL</button>
+                </div>
+                <div class="mm-hint mm-hint--sub" id="mm-img-hint"></div>
             </div>
         </div>
 
         <div class="code-win">
             <div class="code-head">
-                <span id="fn" style="font-size:0.7rem; color:var(--text-dim)">api_demo.sh</span>
+                <span id="fn" class="code-filename">api_demo.sh</span>
                 <button class="copy-btn" id="cp">复制指令</button>
             </div>
             <pre id="code-container"><code id="code"></code></pre>
@@ -519,11 +723,13 @@
 
 <script>
     // 状态管理
-    const state = { m: 'Gemma3-27B', p: '8080', t: 'curl', s: false, mmMode: 'text' };
+    const state = { m: 'Gemma3-27B', p: '8080', t: 'curl', s: false, mmMode: 'text', mmImg: 'url' };
     const api_host = 'api0.brdc-ai.cs.icbc';
     const api_key = 'sk-brdc-ai-cluster';
     /** Qwen 多模态示例用内网图片（Gemma 逻辑不使用） */
     const MM_SAMPLE_IMAGE_URL = 'http://aicode.cs.icbc/icbc/codeweb/static/img/empty.13b7701e.png';
+    /** 1×1 PNG 最小 Data URL，用于 Base64 多模态示例（可替换为业务图编码结果） */
+    const MM_SAMPLE_DATA_URL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
     let gemmaUnlocked = false; // Gemma3 解锁状态
 
     /** 与 docker-compose --alias 一致，供 API 请求使用 */
@@ -579,17 +785,30 @@
             vlmWrap.style.display = isQwenVlm() ? 'block' : 'none';
             if (!isQwenVlm()) state.mmMode = 'text';
         }
+        const mmImgWrap = document.getElementById('mm-img-wrap');
+        const mmImgHint = document.getElementById('mm-img-hint');
+        if (mmImgWrap) {
+            const showMmImg = isQwenVlm() && state.mmMode === 'mm';
+            mmImgWrap.style.display = showMmImg ? 'block' : 'none';
+            if (mmImgHint && showMmImg) {
+                mmImgHint.textContent = state.mmImg === 'base64'
+                    ? 'Base64 分支使用标准 Data URL（data:image/png;base64,…），下方为 1×1 PNG 最小示例，可直接联调；生产环境请替换为真实图片的完整编码。'
+                    : 'URL 分支使用可访问的 http(s) 图片地址（示例为内网静态图）。若图片仅在本地，请切换到「Base64 Data URL」或先上传至可访问存储。';
+            }
+        }
 
         const url = `http://${api_host}:${state.p}/v1`;
         const model = apiModelName();
         const q = "请分析银行大模型应用的合规性建议。";
         const mmPrompt = "请描述图片中的内容，并指出与银行业务相关的要素。";
         const useMm = isQwenVlm() && state.mmMode === 'mm';
+        const mmImgVal = state.mmImg === 'base64' ? MM_SAMPLE_DATA_URL : MM_SAMPLE_IMAGE_URL;
         let c = "";
 
         if (useMm) {
+            const mmFileSuffix = state.mmImg === 'base64' ? '_b64' : '';
             if (state.t === 'curl') {
-                fn.innerText = "test_multimodal.sh";
+                fn.innerText = `test_multimodal${mmFileSuffix}.sh`;
                 c = `<span class="k">curl</span> -N ${url}/chat/completions \\
   -H <span class="s">"Content-Type: application/json"</span> \\
   -H <span class="s">"Authorization: Bearer ${api_key}"</span> \\
@@ -598,17 +817,17 @@
     "messages": [{
       "role": "user",
       "content": [
-        {"type": "image_url", "image_url": {"url": "${MM_SAMPLE_IMAGE_URL}"}},
+        {"type": "image_url", "image_url": {"url": "${mmImgVal}"}},
         {"type": "text", "text": "${mmPrompt}"}
       ]
     }],
     "stream": ${state.s}
   }'</span>`;
             } else if (state.t === 'py') {
-                fn.innerText = "client_multimodal.py";
+                fn.innerText = `client_multimodal${mmFileSuffix}.py`;
                 c = state.s ?
 `<span class="k">import</span> requests, json
-IMAGE_URL = <span class="s">"${MM_SAMPLE_IMAGE_URL}"</span>
+IMAGE_URL = <span class="s">"${mmImgVal}"</span>
 payload = {
     <span class="s">"model"</span>: <span class="s">"${model}"</span>,
     <span class="s">"messages"</span>: [{
@@ -627,7 +846,7 @@ resp = requests.<span class="f">post</span>(<span class="s">"${url}/chat/complet
         <span class="k">if</span> data <span class="k">and</span> data != <span class="s">"[DONE]"</span>:
             <span class="f">print</span>(json.<span class="f">loads</span>(data)[<span class="s">'choices'</span>][<span class="n">0</span>][<span class="s">'delta'</span>].<span class="f">get</span>(<span class="s">'content'</span>, <span class="s">''</span>), end=<span class="s">''</span>, flush=<span class="k">True</span>)` :
 `<span class="k">import</span> requests
-IMAGE_URL = <span class="s">"${MM_SAMPLE_IMAGE_URL}"</span>
+IMAGE_URL = <span class="s">"${mmImgVal}"</span>
 resp = requests.<span class="f">post</span>(<span class="s">"${url}/chat/completions"</span>, json={
     <span class="s">"model"</span>: <span class="s">"${model}"</span>,
     <span class="s">"messages"</span>: [{
@@ -640,9 +859,9 @@ resp = requests.<span class="f">post</span>(<span class="s">"${url}/chat/complet
 })
 <span class="f">print</span>(resp.<span class="f">json</span>()[<span class="s">'choices'</span>][<span class="n">0</span>][<span class="s">'message'</span>][<span class="s">'content'</span>])`;
             } else if (state.t === 'sdk') {
-                fn.innerText = "openai_multimodal.py";
+                fn.innerText = `openai_multimodal${mmFileSuffix}.py`;
                 c = `<span class="k">from</span> openai <span class="k">import</span> OpenAI
-IMAGE_URL = <span class="s">"${MM_SAMPLE_IMAGE_URL}"</span>
+IMAGE_URL = <span class="s">"${mmImgVal}"</span>
 client = <span class="f">OpenAI</span>(base_url=<span class="s">"${url}"</span>, api_key=<span class="s">"${api_key}"</span>)
 user_msg = {
     <span class="s">"role"</span>: <span class="s">"user"</span>,
@@ -658,9 +877,9 @@ resp = client.chat.completions.<span class="f">create</span>(
 )
 ${state.s ? '<span class="k">for</span> chunk <span class="k">in</span> resp: <span class="f">print</span>(chunk.choices[<span class="n">0</span>].delta.content <span class="k">or</span> <span class="s">""</span>, end=<span class="s">""</span>)' : '<span class="f">print</span>(resp.choices[<span class="n">0</span>].message.content)'}`;
             } else if (state.t === 'node') {
-                fn.innerText = "multimodal.mjs";
+                fn.innerText = `multimodal${mmFileSuffix}.mjs`;
                 c = `<span class="k">import</span> OpenAI <span class="k">from</span> <span class="s">"openai"</span>;
-<span class="k">const</span> imageUrl = <span class="s">"${MM_SAMPLE_IMAGE_URL}"</span>;
+<span class="k">const</span> imageUrl = <span class="s">"${mmImgVal}"</span>;
 <span class="k">const</span> api = <span class="k">new</span> <span class="f">OpenAI</span>({ baseURL: <span class="s">"${url}"</span>, apiKey: <span class="s">"${api_key}"</span> });
 <span class="k">const</span> res = <span class="k">await</span> api.chat.completions.<span class="f">create</span>({
     model: <span class="s">"${model}"</span>,
@@ -675,10 +894,10 @@ ${state.s ? '<span class="k">for</span> chunk <span class="k">in</span> resp: <s
 });
 ${state.s ? '<span class="k">for await</span> (<span class="k">const</span> chunk <span class="k">of</span> res) { process.stdout.<span class="f">write</span>(chunk.choices[<span class="n">0</span>]?.delta?.content || <span class="s">""</span>); }' : 'console.<span class="f">log</span>(res.choices[<span class="n">0</span>].message.content);'}`;
             } else if (state.t === 'lc') {
-                fn.innerText = "chain_multimodal.py";
+                fn.innerText = `chain_multimodal${mmFileSuffix}.py`;
                 c = `<span class="k">from</span> langchain_core.messages <span class="k">import</span> HumanMessage
 <span class="k">from</span> langchain_openai <span class="k">import</span> ChatOpenAI
-IMAGE_URL = <span class="s">"${MM_SAMPLE_IMAGE_URL}"</span>
+IMAGE_URL = <span class="s">"${mmImgVal}"</span>
 llm = <span class="f">ChatOpenAI</span>(
     openai_api_base=<span class="s">"${url}"</span>,
     openai_api_key=<span class="s">"${api_key}"</span>,
@@ -748,6 +967,9 @@ ${state.s ? '<span class="k">for</span> chunk <span class="k">in</span> llm.<spa
         document.querySelectorAll('#mm-sel .btn').forEach(b => {
             b.classList.toggle('active', b.dataset.mm === state.mmMode);
         });
+        document.querySelectorAll('#mm-img-sel .btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.img === state.mmImg);
+        });
     }
 
     // 全局解锁函数
@@ -773,6 +995,10 @@ ${state.s ? '<span class="k">for</span> chunk <span class="k">in</span> llm.<spa
     document.querySelectorAll('#mm-sel .btn').forEach(b => b.onclick = () => {
         document.querySelector('#mm-sel .btn.active').classList.remove('active');
         b.classList.add('active'); state.mmMode = b.dataset.mm; draw();
+    });
+    document.querySelectorAll('#mm-img-sel .btn').forEach(b => b.onclick = () => {
+        document.querySelector('#mm-img-sel .btn.active').classList.remove('active');
+        b.classList.add('active'); state.mmImg = b.dataset.img; draw();
     });
     document.querySelectorAll('#t-sel .btn').forEach(b => b.onclick = () => {
         document.querySelector('#t-sel .btn.active').classList.remove('active');
@@ -823,7 +1049,7 @@ ${state.s ? '<span class="k">for</span> chunk <span class="k">in</span> llm.<spa
     (function themeToggle() {
         const btn = document.getElementById('theme-toggle');
         function label() {
-            const t = document.documentElement.getAttribute('data-theme') || 'dark';
+            const t = document.documentElement.getAttribute('data-theme') || 'light';
             btn.title = t === 'dark' ? '切换为浅色模式' : '切换为深色模式';
             btn.setAttribute('aria-label', t === 'dark' ? '切换为浅色主题' : '切换为深色主题');
         }
