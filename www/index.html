@@ -90,6 +90,7 @@
         }
 
         * { box-sizing: border-box; }
+        button::-moz-focus-inner { border: 0; padding: 0; }
         ::selection {
             background: rgba(37, 99, 235, 0.16);
             color: inherit;
@@ -148,7 +149,127 @@
         }
         [data-theme="light"] .logo-title { text-shadow: none; }
         .header-sub { font-size: 0.82rem; font-weight: 600; color: var(--text-dim); }
-        .header-actions { display: flex; align-items: center; gap: 1rem; }
+        .header-actions { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; justify-content: flex-end; }
+        .header-tool-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding-left: 4px;
+            border-left: 1px solid var(--header-divider);
+            margin-left: 2px;
+        }
+        .header-tool-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 11px;
+            border: 1px solid var(--border);
+            background: var(--header-control-bg);
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.15s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .header-tool-btn:hover {
+            color: var(--brand-cyan);
+            border-color: rgba(34, 211, 238, 0.45);
+            background: var(--header-control-hover);
+        }
+        [data-theme="light"] .header-tool-btn:hover { border-color: rgba(8, 145, 178, 0.4); }
+        .header-tool-btn:active { transform: scale(0.96); }
+        .header-tool-btn:focus { outline: none; }
+        .header-tool-btn:focus-visible {
+            outline: 2px solid var(--brand-cyan);
+            outline-offset: 2px;
+        }
+        .header-tool-btn svg { width: 20px; height: 20px; stroke-width: 1.75; }
+
+        .modal-root {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1.25rem;
+        }
+        .modal-root.is-open { display: flex; }
+        .modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+        [data-theme="light"] .modal-backdrop {
+            background: rgba(15, 23, 42, 0.35);
+        }
+        .modal-panel {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 28rem;
+            background: var(--bg-panel);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1.35rem 1.5rem 1.25rem;
+            box-shadow: var(--shadow-card);
+            line-height: 1.65;
+        }
+        .modal-panel h3 {
+            margin: 0 0 0.75rem;
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--heading-strong);
+            letter-spacing: -0.02em;
+        }
+        .modal-panel p { margin: 0 0 1rem; font-size: 0.9rem; color: var(--text-main); }
+        .modal-addr-section { margin: 0 0 1rem; }
+        .modal-addr-section:last-of-type { margin-bottom: 0.25rem; }
+        .modal-addr-label {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: var(--text-dim);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin: 0 0 0.4rem;
+        }
+        .modal-addr-line {
+            display: block;
+            font-family: 'JetBrains Mono', ui-monospace, monospace;
+            font-size: 0.76rem;
+            color: var(--pre-fg);
+            word-break: break-all;
+            margin: 0 0 0.35rem;
+            padding: 0.4rem 0.55rem;
+            background: var(--code-bg);
+            border: 1px solid var(--code-border);
+            border-radius: 8px;
+            line-height: 1.45;
+        }
+        .modal-addr-line:last-child { margin-bottom: 0; }
+        .modal-close {
+            margin-top: 0.25rem;
+            padding: 0.45rem 1.1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--header-control-bg);
+            color: var(--text-main);
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .modal-close:hover {
+            border-color: var(--brand-cyan);
+            color: var(--brand-cyan);
+        }
+        .modal-close:focus { outline: none; }
+        .modal-close:focus-visible { box-shadow: var(--focus-ring); }
         .cluster-status {
             font-size: 0.72rem;
             color: var(--status-ok);
@@ -181,6 +302,7 @@
             color: var(--text-dim);
             cursor: pointer;
             transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.15s;
+            -webkit-tap-highlight-color: transparent;
         }
         .theme-toggle:hover {
             color: var(--brand-cyan);
@@ -189,6 +311,7 @@
         }
         [data-theme="light"] .theme-toggle:hover { border-color: rgba(8, 145, 178, 0.4); }
         .theme-toggle:active { transform: scale(0.96); }
+        .theme-toggle:focus { outline: none; }
         .theme-toggle:focus-visible {
             outline: 2px solid var(--brand-cyan);
             outline-offset: 2px;
@@ -200,14 +323,31 @@
         [data-theme="light"] .theme-icon--dark { display: flex; }
         .theme-icon--light, .theme-icon--dark { align-items: center; justify-content: center; }
 
-        main { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+        main.workspace {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            min-height: 0;
+            background: var(--doc-gradient);
+            align-items: stretch;
+        }
 
-        /* 左侧面板 */
+        /* 左侧面板（与主工作区背景衔接） */
         .sidebar {
-            width: 280px; flex-shrink: 0; background: var(--bg-panel); border-right: 1px solid var(--border);
-            padding: 1.25rem; display: flex; flex-direction: column; gap: 1.25rem;
-            box-shadow: var(--shadow-card);
+            width: 280px;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.78);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-right: 1px solid var(--border);
+            padding: 1.25rem 1.15rem 1.25rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
             transition: background-color 0.28s var(--ease-out);
+        }
+        [data-theme="dark"] .sidebar {
+            background: rgba(15, 23, 42, 0.88);
         }
         .side-label {
             font-size: 0.65rem;
@@ -270,16 +410,18 @@
         .addr.locked { color: #ef4444; }
         .vlm-hint { font-size: 0.65rem; color: var(--accent-purple); margin-top: 5px; font-weight: 600; }
 
-        /* 中间面板（与右侧按 flex 比例分配宽余空间） */
+        /* 中间面板（与主区背景一体，仅本列滚动） */
         .doc-center {
-            flex: 1 1 360px; min-width: 220px; min-height: 0;
+            flex: 1 1 360px;
+            min-width: 220px;
+            min-height: 0;
             padding: 1.75rem clamp(1.25rem, 3vw, 2rem);
             overflow-y: auto;
             overflow-x: hidden;
             scroll-behavior: smooth;
             scrollbar-gutter: stable;
-            background: var(--doc-gradient);
-            transition: background 0.3s var(--ease-out);
+            background: transparent;
+            transition: opacity 0.3s var(--ease-out);
         }
         .doc-center::-webkit-scrollbar { width: 8px; }
         .doc-center::-webkit-scrollbar-track { background: transparent; }
@@ -326,22 +468,49 @@
         [data-theme="light"] .tech-list li::marker { color: var(--brand-blue); }
         .tech-list li strong { color: var(--text-main); }
 
-        /* 右侧代码实验室（较原固定 520px 更易随屏变宽；纵向留给 pre 滚动） */
+        /* 右侧：整列可纵向滚动（与中间文档区行为一致），代码块随内容增高 */
         .playground {
-            flex: 1.35 1 540px; min-width: 460px; max-width: 72rem;
-            min-height: 0; background: var(--bg-panel); border-left: 1px solid var(--border);
-            padding: 0.85rem 1.1rem 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.6rem;
+            flex: 1.35 1 540px;
+            min-width: 460px;
+            max-width: 72rem;
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            scrollbar-gutter: stable;
+            background: rgba(255, 255, 255, 0.78);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-left: 1px solid var(--border);
+            padding: 1rem 1.15rem 1.25rem 1.2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
             transition: background-color 0.28s var(--ease-out);
         }
+        [data-theme="dark"] .playground {
+            background: rgba(15, 23, 42, 0.88);
+        }
+        .playground::-webkit-scrollbar { width: 8px; }
+        .playground::-webkit-scrollbar-track { background: transparent; }
+        .playground::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 99px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+        .playground::-webkit-scrollbar-thumb:hover { background: var(--text-dim); background-clip: padding-box; }
+        .playground { scrollbar-color: var(--border) transparent; scrollbar-width: thin; }
         .playground-eyebrow {
             display: flex;
-            flex-wrap: wrap;
-            align-items: baseline;
-            justify-content: space-between;
-            gap: 0.35rem 1rem;
-            padding-bottom: 0.35rem;
+            flex-wrap: nowrap;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 0.65rem 1rem;
+            padding-bottom: 0.4rem;
             border-bottom: 1px solid var(--border);
-            margin-bottom: 0.15rem;
+            margin-bottom: 0.1rem;
+            min-width: 0;
         }
         .playground-eyebrow__title {
             font-size: 0.72rem;
@@ -349,13 +518,29 @@
             letter-spacing: 0.12em;
             text-transform: uppercase;
             color: var(--brand-cyan);
+            flex-shrink: 0;
         }
         .playground-eyebrow__hint {
             font-size: 0.68rem;
             color: var(--text-dim);
             font-weight: 500;
-            max-width: 20rem;
             line-height: 1.45;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 0;
+            flex: 1;
+        }
+        @media (max-width: 1180px) {
+            .playground-eyebrow {
+                flex-wrap: wrap;
+            }
+            .playground-eyebrow__hint {
+                white-space: normal;
+                flex: 1 1 100%;
+                overflow: visible;
+                text-overflow: unset;
+            }
         }
         .control-unit {
             flex-shrink: 0;
@@ -410,9 +595,13 @@
             flex: 1; background: transparent; border: none; color: var(--text-dim);
             padding: 7px 2px; border-radius: 7px; cursor: pointer; font-size: 0.72rem; font-weight: 700;
             transition: background 0.18s, color 0.18s, transform 0.15s;
+            -webkit-tap-highlight-color: transparent;
         }
+        /* 内网旧版浏览器鼠标点击后易残留系统焦点框：仅键盘 Tab 时显示自定义焦点环 */
+        .btn:focus { outline: none; box-shadow: none; }
         .btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
         .btn:hover { color: var(--text-main); background: rgba(59, 130, 246, 0.12); }
+        /* 浅色下 .btn:hover 特异性会压过 .btn.active，需单独恢复选中态渐变 */
         [data-theme="light"] .btn:hover { background: rgba(37, 99, 235, 0.1); }
         .btn.active {
             background: linear-gradient(135deg, var(--brand-blue), #0ea5e9);
@@ -421,6 +610,19 @@
         }
         [data-theme="light"] .btn.active { box-shadow: 0 2px 10px rgba(37, 99, 235, 0.25); }
         .btn.active:focus-visible { box-shadow: var(--focus-ring), 0 2px 12px rgba(37, 99, 235, 0.35); }
+        /* 选中项悬停：保持蓝渐变，仅略提亮，避免「蓝 → 浅灰底」跳变 */
+        .btn-row .btn.active:hover {
+            color: #fff;
+            background: linear-gradient(135deg, #3b82f6, #22d3ee);
+            filter: brightness(1.06);
+            box-shadow: 0 2px 14px rgba(59, 130, 246, 0.42);
+        }
+        [data-theme="light"] .btn-row .btn.active:hover {
+            background: linear-gradient(135deg, #2563eb, #0ea5e9);
+            color: #fff;
+            filter: brightness(1.04);
+            box-shadow: 0 2px 12px rgba(37, 99, 235, 0.32);
+        }
 
         .stream-switch { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; border-radius: var(--radius-sm); }
         .stream-switch:focus-visible { outline: none; box-shadow: var(--focus-ring); }
@@ -431,10 +633,17 @@
         .stream-switch.active .toggle { background: var(--brand-cyan); }
         .stream-switch.active .toggle::after { left: 20px; }
 
-        /* 代码区 */
+        /* 代码区：高度随内容增长，由 .playground 整体滚动 */
         .code-win {
-            flex: 1 1 auto; min-height: 0; background: var(--code-bg); border-radius: var(--radius-md); border: 1px solid var(--code-border);
-            display: flex; flex-direction: column; overflow: hidden; position: relative;
+            flex: 0 0 auto;
+            min-height: 13rem;
+            background: var(--code-bg);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--code-border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 1px 3px rgba(0, 0, 0, 0.06);
             transition: background-color 0.25s, border-color 0.25s, box-shadow 0.25s;
         }
@@ -443,6 +652,7 @@
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 2px 8px rgba(15, 23, 42, 0.06);
         }
         .code-head {
+            flex-shrink: 0;
             background: var(--code-head-bg);
             padding: 9px 14px;
             border-bottom: 1px solid var(--code-border);
@@ -463,24 +673,37 @@
         [data-theme="light"] .copy-btn { background: #fff; }
         .copy-btn:hover { background: rgba(34, 211, 238, 0.12); color: var(--brand-cyan); border-color: rgba(34, 211, 238, 0.35); }
         [data-theme="light"] .copy-btn:hover { background: rgba(8, 145, 178, 0.1); border-color: rgba(8, 145, 178, 0.35); }
+        .copy-btn { -webkit-tap-highlight-color: transparent; }
+        .copy-btn:focus { outline: none; box-shadow: none; }
         .copy-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
         .copy-btn.copy-btn--ok { color: var(--brand-cyan) !important; border-color: rgba(34, 211, 238, 0.5) !important; }
 
-        pre {
-            margin: 0; padding: 1rem 1.15rem; overflow: auto; flex: 1 1 auto; min-height: 0;
+        pre#code-container {
+            margin: 0;
+            padding: 1rem 1.15rem;
+            overflow-x: auto;
+            overflow-y: visible;
+            -webkit-overflow-scrolling: touch;
+            flex: 0 0 auto;
+            min-height: 11rem;
+            max-height: none;
             font-family: 'JetBrains Mono', 'Consolas', ui-monospace, monospace;
-            font-size: 0.8125rem; line-height: 1.6; color: var(--pre-fg);
+            font-size: 0.8125rem;
+            line-height: 1.6;
+            color: var(--pre-fg);
             transition: color 0.2s;
             tab-size: 4;
+            white-space: pre;
+            word-break: normal;
         }
-        pre::-webkit-scrollbar { width: 8px; height: 8px; }
-        pre::-webkit-scrollbar-thumb {
+        pre#code-container::-webkit-scrollbar { width: 8px; height: 8px; }
+        pre#code-container::-webkit-scrollbar-thumb {
             background: var(--border);
             border-radius: 99px;
             border: 2px solid var(--code-bg);
         }
-        pre::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
-        pre { scrollbar-color: var(--border) var(--code-bg); scrollbar-width: thin; }
+        pre#code-container::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+        pre#code-container { scrollbar-color: var(--border) var(--code-bg); scrollbar-width: thin; }
         .k { color: var(--k); } .s { color: var(--s); } .f { color: var(--f); } .a { color: var(--a); } .n { color: var(--n); }
 
         /* 锁屏界面 */
@@ -490,6 +713,7 @@
         }
         .lock-icon { width: 48px; height: 48px; margin-bottom: 15px; fill: none; stroke: #ef4444; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
         .lock-title { font-size: 1.05rem; color: var(--heading-strong); font-weight: 800; margin-bottom: 6px; }
+        .lock-sub { font-size: 0.8rem; color: var(--text-dim); line-height: 1.5; max-width: 18rem; }
         .pwd-input {
             background: rgba(0, 0, 0, 0.2);
             border: 1px solid var(--code-border);
@@ -504,7 +728,11 @@
         .pwd-btn {
             background: var(--brand-blue); border: none; color: #fff; padding: 10px 22px;
             border-radius: 8px; cursor: pointer; font-weight: 700; margin-left: 10px; transition: background 0.2s, transform 0.15s;
+            -webkit-tap-highlight-color: transparent;
         }
+        .pwd-btn::-moz-focus-inner { border: 0; }
+        .pwd-btn:focus { outline: none; }
+        .pwd-btn:focus-visible { box-shadow: var(--focus-ring); }
         .pwd-btn:hover { filter: brightness(1.08); }
         .pwd-btn:active { transform: scale(0.98); }
         .pwd-row { display: flex; align-items: center; margin-top: 20px; flex-wrap: wrap; justify-content: center; }
@@ -579,23 +807,62 @@
     <div class="logo-box">
         <div class="logo-title">Brdc.ai</div>
         <div class="header-divider" aria-hidden="true"></div>
-        <div class="header-sub">人工智能小组 · 高性能推理网关</div>
+        <div class="header-sub">企业推理网关 · 模型接入与调用规范</div>
     </div>
     <div class="header-actions">
         <div class="cluster-status">
             <div class="blink"></div>
             集群状态: 运行中 (NVIDIA 架构加速已开启)
         </div>
-        <button type="button" class="theme-toggle" id="theme-toggle" aria-label="切换浅色或深色主题">
-            <span class="theme-icon theme-icon--light" aria-hidden="true">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
-            </span>
-            <span class="theme-icon theme-icon--dark" aria-hidden="true">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>
-            </span>
-        </button>
+        <div class="header-tool-group" role="group" aria-label="显示与帮助">
+            <button type="button" class="theme-toggle" id="theme-toggle" aria-label="切换浅色或深色主题">
+                <span class="theme-icon theme-icon--light" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
+                </span>
+                <span class="theme-icon theme-icon--dark" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>
+                </span>
+            </button>
+            <button type="button" class="header-tool-btn" id="btn-contact"
+                title="查看联络方式"
+                aria-label="联络方式"
+                aria-haspopup="dialog"
+                aria-controls="modal-contact">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
+            </button>
+            <button type="button" class="header-tool-btn" id="btn-opensource"
+                title="查看开源仓库与完整访问地址"
+                aria-label="开源与完整地址"
+                aria-haspopup="dialog"
+                aria-controls="modal-opensource">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 10.5L21 3m0 0h-5.25M21 3v5.25" /></svg>
+            </button>
+        </div>
     </div>
 </header>
+
+<div id="modal-contact" class="modal-root" role="dialog" aria-modal="true" aria-labelledby="modal-contact-title" hidden>
+    <div class="modal-backdrop" data-close-modal tabindex="-1"></div>
+    <div class="modal-panel">
+        <h3 id="modal-contact-title">联络方式</h3>
+        <p>如有更多问题，请联系<strong>大数据部-徐鸿铎</strong>。</p>
+        <button type="button" class="modal-close" data-close-modal>关闭</button>
+    </div>
+</div>
+
+<div id="modal-opensource" class="modal-root" role="dialog" aria-modal="true" aria-labelledby="modal-opensource-title" hidden>
+    <div class="modal-backdrop" data-close-modal tabindex="-1"></div>
+    <div class="modal-panel">
+        <h3 id="modal-opensource-title">开源与完整地址</h3>
+        <p>相关技术方案已开源。以下为<strong>完整 URL</strong>，可直接选中复制。</p>
+        <div class="modal-addr-section">
+            <div class="modal-addr-label">门户与代码仓库</div>
+            <code class="modal-addr-line">https://brdc-ai.cs.icbc</code>
+            <code class="modal-addr-line">https://github.com/xhongduo-tech/v100-llm-deploy</code>
+        </div>
+        <button type="button" class="modal-close" data-close-modal>关闭</button>
+    </div>
+</div>
 
 <div class="platform-banner" role="region" aria-label="素材批处理辅助说明">
     <div class="banner-inner">
@@ -604,10 +871,10 @@
     </div>
 </div>
 
-<main>
+<main class="workspace">
     <div class="sidebar">
         <section>
-            <div class="side-label">硬件核心状态</div>
+            <div class="side-label">运行概览</div>
             <div class="stat-box">
                 <div class="stat-card"><div class="stat-n">计算架构</div><div class="stat-v">Volta+</div></div>
                 <div class="stat-card"><div class="stat-n">量化方案</div><div class="stat-v">Q4_K_M</div></div>
@@ -617,7 +884,7 @@
         </section>
 
         <section>
-            <div class="side-label">在线模型矩阵</div>
+            <div class="side-label">模型与端点</div>
             <div class="mini-card">
                 <h4>Gemma3-27B <span class="tps-tag">30-40 t/s</span></h4>
                 <code class="addr locked" id="gemma-addr">*** 受权限管控 ***</code>
@@ -637,25 +904,25 @@
 
     <div class="doc-center">
         <div class="doc-section">
-            <h2>底层部署策略与方案</h2>
+            <h2>架构与能力说明</h2>
             <div class="tech-box">
-                <p>Brdc.ai 推理网关旨在为全行提供<strong>高并发、低延迟</strong>的大模型推理能力。基于高性能 NVIDIA 架构，我们实现了以下核心技术突破：</p>
+                <p>本推理网关面向生产环境提供<strong>高并发、低时延</strong>的大模型推理服务，基于 NVIDIA 加速与容器化隔离，主要技术要点如下：</p>
                 <ul class="tech-list">
-                    <li><strong>物理级硬件隔离：</strong> 通过 Docker 容器技术，将 Gemma 与 Qwen 模型分别映射至独立的 GPU 核心。确保单模型全负载运行时互不干扰，计算响应时间抖动率低于 3%。</li>
-                    <li><strong>连续批处理 (Continuous Batching)：</strong> 舍弃了传统的静态批处理方案，采用流式请求插入技术。在不增加首字延迟的情况下，将系统整体吞吐量提升了 <strong>4.5 倍</strong>。</li>
-                    <li><strong>GGUF 矩阵优化：</strong> 采用 Q4_K_M 高精度量化算法，在大幅缩减显存占用的同时，保留了超过 98% 的模型原始推理精度。</li>
-                    <li><strong>多模态视觉扩展 (VLM)：</strong> 为 Qwen3.5 系列加载 FP16 精度多模态投影器（mmproj），在零额外显存开销的前提下赋予模型图像理解能力，支持票据识别、图表分析等业务场景。</li>
+                    <li><strong>算力隔离：</strong> 各模型实例运行于独立容器并绑定独立 GPU，满载下互不抢占，时延抖动可控。</li>
+                    <li><strong>连续批处理 (Continuous Batching)：</strong> 动态合并推理请求，在控制首包时延的前提下提升吞吐。</li>
+                    <li><strong>GGUF 量化：</strong> 采用 Q4_K_M 等量化格式，在显存与精度之间取得工程平衡。</li>
+                    <li><strong>多模态 (VLM)：</strong> Qwen3.5 系列配合 mmproj，支持图像与文本联合输入，适用于票据、图表等视觉理解场景。</li>
                 </ul>
             </div>
         </div>
 
         <div class="doc-section">
-            <h2>模型能力概览</h2>
+            <h2>模型选型说明</h2>
             <div class="tech-box">
                 <ul class="tech-list">
-                    <li><strong>Gemma3-27B：</strong> Google 最新世代权重，擅长<strong>复杂逻辑推理、代码生成</strong>及长文本摘要。（注：由于含核心策略，需内部密码授权访问）。</li>
-                    <li><strong>Qwen3.5-35B：</strong> 通义千问大参数量版，深度优化了<strong>金融语境理解</strong>，适合专业公文写作与合规风险分析。现已加载多模态视觉投影器（mmproj），支持<strong>图像 + 文本混合输入</strong>，可直接理解票据、图表、截图等视觉材料。</li>
-                    <li><strong>Qwen3.5-9B：</strong> 极致响应速度。在专用节点上跑出了 <strong>80 tokens/s</strong> 的惊人速度。同样搭载多模态投影器，是<strong>实时 OCR 校验、图片内容审核</strong>与轻量级视觉交互的最佳选择。</li>
+                    <li><strong>Gemma3-27B：</strong> 通用推理与代码、长文本场景；访问受内部管控，需在右栏完成授权后查看调用示例。</li>
+                    <li><strong>Qwen3.5-35B：</strong> 大参数量、偏复杂语义与合规类文本；支持 VLM，图像与文本可同请求提交。</li>
+                    <li><strong>Qwen3.5-9B：</strong> 低时延、高吞吐，适合 OCR 校验、图像审核等轻量多模态交互（参考环境约 80 tokens/s）。</li>
                 </ul>
             </div>
         </div>
@@ -664,10 +931,10 @@
     <div class="playground">
         <div class="playground-eyebrow">
             <span class="playground-eyebrow__title">API 调用示例</span>
-            <span class="playground-eyebrow__hint">选择模型与技术栈，按需开启流式；可复制下方代码直接联调。</span>
+            <span class="playground-eyebrow__hint" title="选择模型与协议示例，按需启用流式输出；复制下方代码即可联调。">选择模型与协议示例，按需启用流式输出；复制下方代码即可联调。</span>
         </div>
         <div class="control-unit">
-            <span class="label">模型选择</span>
+            <span class="label">目标模型</span>
             <div class="btn-row" id="m-sel">
                 <button class="btn active" data-v="Gemma3-27B" data-p="8080">Gemma3 <svg style="width:10px;height:10px;margin-left:2px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></button>
                 <button class="btn" data-v="Qwen3.5-35B" data-p="8081">Qwen-35B</button>
@@ -676,7 +943,7 @@
         </div>
 
         <div class="control-unit">
-            <span class="label">接入技术栈</span>
+            <span class="label">客户端示例</span>
             <div class="btn-row" id="t-sel">
                 <button class="btn active" data-v="curl">cURL</button>
                 <button class="btn" data-v="py">Requests</button>
@@ -687,12 +954,12 @@
         </div>
 
         <div class="control-unit stream-switch" id="s-toggle">
-            <span class="label" style="margin:0">开启流式输出 (Streaming)</span>
+            <span class="label" style="margin:0">流式输出 (SSE)</span>
             <div class="toggle"></div>
         </div>
 
         <div class="control-unit" id="vlm-mode-wrap" style="display:none;">
-            <span class="label">Qwen 示例类型</span>
+            <span class="label">Qwen 请求模式</span>
             <div class="btn-row" id="mm-sel">
                 <button class="btn active" data-mm="text">纯文本对话</button>
                 <button class="btn" data-mm="mm">多模态 (图像+文本)</button>
@@ -714,7 +981,7 @@
         <div class="code-win">
             <div class="code-head">
                 <span id="fn" class="code-filename">api_demo.sh</span>
-                <button class="copy-btn" id="cp">复制指令</button>
+                <button class="copy-btn" id="cp" type="button">复制示例代码</button>
             </div>
             <pre id="code-container"><code id="code"></code></pre>
         </div>
@@ -759,15 +1026,20 @@
             gemmaAddr.classList.add('locked');
         }
 
-        // 拦截：如果是 Gemma3 且未解锁，显示密码锁界面
+        // 拦截：如果是 Gemma3 且未解锁，显示密码锁界面（须先收起 Qwen 专属面板，避免与锁屏并存）
         if (state.m === 'Gemma3-27B' && !gemmaUnlocked) {
+            const vlmEarly = document.getElementById('vlm-mode-wrap');
+            if (vlmEarly) vlmEarly.style.display = 'none';
+            const mmEarly = document.getElementById('mm-img-wrap');
+            if (mmEarly) mmEarly.style.display = 'none';
+            state.mmMode = 'text';
             fn.innerText = "system.security.lock";
             cpBtn.style.display = 'none'; // 隐藏复制按钮
             preContainer.innerHTML = `
                 <div class="lock-screen">
                     <svg class="lock-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                     <div class="lock-title">Gemma3-27B API 访问受限</div>
-                    <div style="font-size: 0.8rem; color: var(--text-dim);">此节点涉及核心业务逻辑，请输入网关授权码查看</div>
+                    <div class="lock-sub">此节点受内部访问控制，请输入授权码后查看调用示例。</div>
                     <div class="pwd-row">
                         <input type="password" id="pwd-input" class="pwd-input" placeholder="输入 Password" onkeypress="if(event.keyCode===13) unlockGemma()">
                         <button class="pwd-btn" onclick="unlockGemma()">解 锁</button>
@@ -775,6 +1047,12 @@
                     <div id="pwd-err" class="err-msg">密码验证失败，请重试</div>
                 </div>
             `;
+            document.querySelectorAll('#mm-sel .btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.mm === state.mmMode);
+            });
+            document.querySelectorAll('#mm-img-sel .btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.img === state.mmImg);
+            });
             return;
         }
 
@@ -1041,7 +1319,7 @@ ${state.s ? '<span class="k">for</span> chunk <span class="k">in</span> llm.<spa
         this.classList.add('copy-btn--ok');
         this.innerText = "✓ 复制成功";
         setTimeout(() => {
-            this.innerText = "复制指令";
+            this.innerText = "复制示例代码";
             this.classList.remove('copy-btn--ok');
         }, 2000);
     };
@@ -1060,6 +1338,65 @@ ${state.s ? '<span class="k">for</span> chunk <span class="k">in</span> llm.<spa
             label();
         });
         label();
+    })();
+
+    /* 鼠标点选后移出焦点，避免内网浏览器残留系统矩形焦点框；键盘 Tab 仍可用 :focus-visible */
+    document.body.addEventListener('mouseup', function (e) {
+        var el = e.target;
+        if (!el || !el.closest) return;
+        var btn = el.closest('button.btn, button.copy-btn, button.theme-toggle, button.pwd-btn, button.header-tool-btn, button.modal-close');
+        if (btn) requestAnimationFrame(function () { try { btn.blur(); } catch (err) {} });
+    }, false);
+
+    (function headerModals() {
+        var contactBtn = document.getElementById('btn-contact');
+        var osBtn = document.getElementById('btn-opensource');
+        var modalContact = document.getElementById('modal-contact');
+        var modalOpensource = document.getElementById('modal-opensource');
+        var openEl = null;
+
+        function closeModal(root) {
+            if (!root) return;
+            root.classList.remove('is-open');
+            root.setAttribute('hidden', '');
+            if (openEl === root) openEl = null;
+            document.body.style.overflow = '';
+        }
+
+        function openModal(root) {
+            if (!root) return;
+            if (openEl && openEl !== root) closeModal(openEl);
+            root.classList.add('is-open');
+            root.removeAttribute('hidden');
+            openEl = root;
+            document.body.style.overflow = 'hidden';
+        }
+
+        document.querySelectorAll('[data-close-modal]').forEach(function (el) {
+            el.addEventListener('click', function () {
+                var root = el.closest('.modal-root');
+                if (root) closeModal(root);
+            });
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && openEl) {
+                e.preventDefault();
+                closeModal(openEl);
+            }
+        });
+
+        if (contactBtn && modalContact) {
+            contactBtn.addEventListener('click', function () {
+                openModal(modalContact);
+            });
+        }
+
+        if (osBtn && modalOpensource) {
+            osBtn.addEventListener('click', function () {
+                openModal(modalOpensource);
+            });
+        }
     })();
 
     // 初始化渲染
