@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="dark light">
-    <title>Brdc.ai | 企业级高性能推理网关</title>
+    <title>Bxdc.ai | 企业级高性能推理网关</title>
     <script>
         (function () {
             try {
-                var t = localStorage.getItem('brdc-theme');
+                var t = localStorage.getItem('bxdc-theme');
                 if (t !== 'light' && t !== 'dark') t = 'light';
                 document.documentElement.setAttribute('data-theme', t);
             } catch (e) { document.documentElement.setAttribute('data-theme', 'light'); }
@@ -805,7 +805,7 @@
 
 <header>
     <div class="logo-box">
-        <div class="logo-title">Brdc.ai</div>
+        <div class="logo-title">Bxdc.ai</div>
         <div class="header-divider" aria-hidden="true"></div>
         <div class="header-sub">企业推理网关 · 模型接入与调用规范</div>
     </div>
@@ -857,7 +857,7 @@
         <p>相关技术方案已开源。以下为<strong>完整 URL</strong>，可直接选中复制。</p>
         <div class="modal-addr-section">
             <div class="modal-addr-label">门户与代码仓库</div>
-            <code class="modal-addr-line">https://brdc-ai.cs.icbc</code>
+            <code class="modal-addr-line">https://bxdc-ai.cs.icbc</code>
             <code class="modal-addr-line">https://github.com/xhongduo-tech/v100-llm-deploy</code>
         </div>
         <button type="button" class="modal-close" data-close-modal>关闭</button>
@@ -891,12 +891,12 @@
             </div>
             <div class="mini-card">
                 <h4>Qwen3.5-35B <span class="tps-tag">35-40 t/s</span></h4>
-                <code class="addr">api0.brdc-ai.cs.icbc:8081</code>
+                <code class="addr">api0.bxdc-ai.cs.icbc:8081</code>
                 <div class="vlm-hint">&#128247; 多模态 VLM 已启用</div>
             </div>
             <div class="mini-card">
                 <h4>Qwen3.5-9B <span class="tps-tag">75-80 t/s</span></h4>
-                <code class="addr">api0.brdc-ai.cs.icbc:8082</code>
+                <code class="addr">api0.bxdc-ai.cs.icbc:8082</code>
                 <div class="vlm-hint">&#128247; 多模态 VLM 已启用</div>
             </div>
         </section>
@@ -991,8 +991,8 @@
 <script>
     // 状态管理
     const state = { m: 'Gemma3-27B', p: '8080', t: 'curl', s: false, mmMode: 'text', mmImg: 'url' };
-    const api_host = 'api0.brdc-ai.cs.icbc';
-    const api_key = 'sk-brdc-ai-cluster';
+    const api_host = 'api0.bxdc-ai.cs.icbc';
+    const api_key = 'sk-bxdc-ai-cluster';
     /** Qwen 多模态示例用内网图片（Gemma 逻辑不使用） */
     const MM_SAMPLE_IMAGE_URL = 'http://aicode.cs.icbc/icbc/codeweb/static/img/empty.13b7701e.png';
     /** 1×1 PNG 最小 Data URL，用于 Base64 多模态示例（可替换为业务图编码结果） */
@@ -1018,7 +1018,7 @@
 
         // 更新左侧侧边栏地址显示
         if (gemmaUnlocked) {
-            gemmaAddr.innerText = "api0.brdc-ai.cs.icbc:8080";
+            gemmaAddr.innerText = "api0.bxdc-ai.cs.icbc:8080";
             gemmaAddr.classList.remove('locked');
             gemmaAddr.style.color = "var(--brand-cyan)";
         } else {
@@ -1334,7 +1334,7 @@ ${state.s ? '<span class="k">for</span> chunk <span class="k">in</span> llm.<spa
         btn.addEventListener('click', function () {
             const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
             document.documentElement.setAttribute('data-theme', next);
-            try { localStorage.setItem('brdc-theme', next); } catch (e) {}
+            try { localStorage.setItem('bxdc-theme', next); } catch (e) {}
             label();
         });
         label();
