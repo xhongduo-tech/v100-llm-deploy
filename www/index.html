@@ -857,7 +857,7 @@
         <p>相关技术方案已开源。以下为<strong>完整 URL</strong>，可直接选中复制。</p>
         <div class="modal-addr-section">
             <div class="modal-addr-label">门户与代码仓库</div>
-            <code class="modal-addr-line">https://bxdc-ai.cs.icbc</code>
+            <code class="modal-addr-line">https://bxdc-ai.cs.ixbc</code>
             <code class="modal-addr-line">https://github.com/xhongduo-tech/v100-llm-deploy</code>
         </div>
         <button type="button" class="modal-close" data-close-modal>关闭</button>
@@ -867,7 +867,7 @@
 <div class="platform-banner" role="region" aria-label="素材批处理辅助说明">
     <div class="banner-inner">
         <strong>素材批处理辅助：</strong>为支持图片与版式素材的批量处理与联调，测试环境已部署统一服务，提供 <strong>Base64 / HTML / SVG</strong> 等格式能力与<strong>批处理流水线</strong>，可按需访问
-        <a href="http://img-convert.cs.icbc" target="_blank" rel="noopener noreferrer">http://img-convert.cs.icbc</a>
+        <a href="http://img-convert.cs.ixbc" target="_blank" rel="noopener noreferrer">http://img-convert.cs.ixbc</a>
     </div>
 </div>
 
@@ -891,12 +891,12 @@
             </div>
             <div class="mini-card">
                 <h4>Qwen3.5-35B <span class="tps-tag">35-40 t/s</span></h4>
-                <code class="addr">api0.bxdc-ai.cs.icbc:8081</code>
+                <code class="addr">api0.bxdc-ai.cs.ixbc:8081</code>
                 <div class="vlm-hint">&#128247; 多模态 VLM 已启用</div>
             </div>
             <div class="mini-card">
                 <h4>Qwen3.5-9B <span class="tps-tag">75-80 t/s</span></h4>
-                <code class="addr">api0.bxdc-ai.cs.icbc:8082</code>
+                <code class="addr">api0.bxdc-ai.cs.ixbc:8082</code>
                 <div class="vlm-hint">&#128247; 多模态 VLM 已启用</div>
             </div>
         </section>
@@ -966,7 +966,7 @@
             </div>
             <div class="mm-hint">
                 多模态示例使用 OpenAI 兼容的 <code class="mm-hint-code">image_url</code>。请在下方切换<strong>内网 URL</strong>与<strong>Base64 Data URL</strong>查看对应请求体；亦支持 <code class="mm-hint-code">data:image/jpeg;base64,...</code> 等格式。素材转码与批处理可使用
-                <a href="http://img-convert.cs.icbc" target="_blank" rel="noopener noreferrer" class="mm-hint-link">img-convert.cs.icbc</a>。
+                <a href="http://img-convert.cs.ixbc" target="_blank" rel="noopener noreferrer" class="mm-hint-link">img-convert.cs.ixbc</a>。
             </div>
             <div id="mm-img-wrap" class="mm-img-wrap" style="display:none;">
                 <span class="label mm-img-wrap__label">图片传入方式</span>
@@ -991,10 +991,10 @@
 <script>
     // 状态管理
     const state = { m: 'Gemma3-27B', p: '8080', t: 'curl', s: false, mmMode: 'text', mmImg: 'url' };
-    const api_host = 'api0.bxdc-ai.cs.icbc';
+    const api_host = 'api0.bxdc-ai.cs.ixbc';
     const api_key = 'sk-bxdc-ai-cluster';
     /** Qwen 多模态示例用内网图片（Gemma 逻辑不使用） */
-    const MM_SAMPLE_IMAGE_URL = 'http://aicode.cs.icbc/icbc/codeweb/static/img/empty.13b7701e.png';
+    const MM_SAMPLE_IMAGE_URL = 'http://aicode.cs.ixbc/ixbc/codeweb/static/img/empty.13b7701e.png';
     /** 1×1 PNG 最小 Data URL，用于 Base64 多模态示例（可替换为业务图编码结果） */
     const MM_SAMPLE_DATA_URL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
     let gemmaUnlocked = false; // Gemma3 解锁状态
@@ -1018,7 +1018,7 @@
 
         // 更新左侧侧边栏地址显示
         if (gemmaUnlocked) {
-            gemmaAddr.innerText = "api0.bxdc-ai.cs.icbc:8080";
+            gemmaAddr.innerText = "api0.bxdc-ai.cs.ixbc:8080";
             gemmaAddr.classList.remove('locked');
             gemmaAddr.style.color = "var(--brand-cyan)";
         } else {
